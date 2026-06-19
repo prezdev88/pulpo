@@ -1,0 +1,514 @@
+/* Premium Dark Theme */
+:root {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --accent-color: #bb86fc;
+    --surface-color: #1e1e1e;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Custom Scrollbar for Dark Theme */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+header {
+    background-color: var(--surface-color);
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: radial-gradient(circle at top left, #2c2c2c, var(--bg-color));
+}
+
+.landing-card {
+    margin: auto;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 3rem 4rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    max-width: 400px;
+}
+
+.landing-card p {
+    color: #a0a0a0;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #bb86fc, #6200ea);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(98, 0, 234, 0.4);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(98, 0, 234, 0.6);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.path-text {
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #4ade80;
+}
+
+.commit-row.selected {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.commit-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.commit-meta-row {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.badge {
+    background: var(--accent-color);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.text-muted {
+    color: #888;
+}
+
+.diff-layout {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    gap: 1rem;
+    min-width: 0;
+}
+
+.diff-file-list {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem;
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.file-item {
+    padding: 0.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: monospace;
+}
+
+.file-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.commits-sidebar {
+    width: 350px;
+    min-width: 200px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.diff-viewer {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    overflow: auto;
+    font-family: monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: pre;
+    min-height: 0;
+}
+
+.diff-placeholder {
+    color: #888;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.diff-line-add {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    display: block;
+}
+
+.diff-line-del {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+    display: block;
+}
+
+.diff-line-info {
+    color: #60a5fa;
+    display: block;
+}
+
+.diff-line-normal {
+    display: block;
+}
+
+/* Layout Split */
+.layout-split {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    background: var(--bg-color);
+}
+
+/* Tabs Bar */
+.tabs-bar {
+    display: flex;
+    align-items: center;
+    background: var(--surface-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 40px;
+    min-height: 40px;
+}
+
+.tabs-container {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 100%;
+}
+
+.tabs-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tab-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    height: 100%;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #a0a0a0;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+    max-width: 200px;
+}
+
+.tab-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.tab-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+.tab-close {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff6b6b;
+}
+
+.add-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    padding: 0 1rem;
+    cursor: pointer;
+    height: 100%;
+    transition: background 0.2s;
+}
+
+.add-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.commits-sidebar {
+    width: 25%;
+    min-width: 200px;
+    max-width: 50vw;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-color);
+}
+
+.resizer {
+    width: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: col-resize;
+    z-index: 100;
+    transition: background 0.2s;
+}
+
+.resizer:hover, .resizer.resizing {
+    background: var(--accent-color);
+}
+
+.commit-details-pane {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    background: var(--bg-color);
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+}
+
+.icon-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.icon-btn:hover {
+    opacity: 1;
+}
+
+.hidden-sidebar {
+    display: none !important;
+}
+
+.placeholder-text {
+    color: #555;
+    font-size: 1rem;
+    margin: auto; /* Centers the placeholder text in the flex column */
+}
+
+#commit-details-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.repo-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.repo-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.repo-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+}
+
+.glass-select, .glass-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.glass-select {
+    flex: 1;
+}
+
+.glass-select option {
+    background: var(--surface-color);
+    color: var(--text-color);
+}
+
+.glass-btn:hover, .glass-select:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.commits-table-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+}
+
+.minimalist-tree {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.commit-graph-canvas {
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    width: 60px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.commit-row {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 60px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 4px;
+    min-height: 48px; /* To ensure uniform spacing */
+}
+
+.commit-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+
+
+.commit-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.commit-message {
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.commit-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+}
+
+.commit-author {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.commit-date {
+    color: #666;
+    font-size: 0.7rem;
+    margin-top: 0.1rem;
+}

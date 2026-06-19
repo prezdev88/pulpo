@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulpo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <main>
+            <!-- Vista 1: Landing -->
+            <div class="landing-card" id="landing-card">
+                <h1>Pulpo</h1>
+                <p>Select a local Git repository to view its commit history.</p>
+                <button id="open-repo-btn" class="primary-btn">Browse Folders</button>
+                <div id="repo-path-display" class="hidden path-text"></div>
+            </div>
+
+            <!-- Barra de Pestañas (Multi-Proyecto) -->
+            <nav id="tabs-bar" class="tabs-bar hidden">
+                <div id="tabs-container" class="tabs-container">
+                    <!-- Tabs go here -->
+                </div>
+                <button id="add-tab-btn" class="add-tab-btn" title="Open Repository">+</button>
+            </nav>
+
+            <!-- Vista 2: Historial de Commits -->
+            <div id="commits-view" class="hidden layout-split">
+                <aside class="commits-sidebar" id="commits-sidebar">
+                    <header class="repo-header">
+                        <h2 id="active-repo-name">Repository</h2>
+                        <div class="repo-actions">
+                            <select id="branch-selector" class="glass-select"></select>
+                            <button id="new-branch-btn" class="glass-btn" title="Create New Branch">+</button>
+                            <button id="stash-btn" class="glass-btn" title="Stash Changes">📦</button>
+                            <button id="pop-stash-btn" class="glass-btn" title="Pop Stash">📥</button>
+                        </div>
+                    </header>
+                    <div class="commits-table-container" style="position: relative;">
+                        <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
+                        <ul class="minimalist-tree" id="commits-tbody">
+                            <!-- Commits renderizados irán aquí -->
+                        </ul>
+                    </div>
+                </aside>
+                <div class="resizer" id="sidebar-resizer"></div>
+                <section class="commit-details-pane">
+                    <button id="toggle-sidebar-btn" class="icon-btn" title="Toggle Sidebar">☰</button>
+                    <div id="commit-details-content" class="hidden">
+                        <div class="commit-header">
+                            <h3 id="detail-message"></h3>
+                            <div class="commit-meta-row">
+                                <span class="badge" id="detail-hash"></span>
+                                <span id="detail-author"></span>
+                                <span id="detail-date" class="text-muted"></span>
+                            </div>
+                        </div>
+                        <div class="diff-layout">
+                            <div class="diff-file-list" id="diff-file-list">
+                                <!-- Changed files will be listed here -->
+                            </div>
+                            <div class="diff-viewer" id="diff-viewer">
+                                <div class="diff-placeholder">Select a file to view its diff</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="placeholder-text" id="details-placeholder">Select a commit to view details</p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Template 100% HTML para los commits (RNF05) -->
+    <template id="commit-template">
+        <li class="commit-row">
+            <div class="commit-content">
+                <div class="commit-message" data-field="message"></div>
+                <div class="commit-meta">
+                    <span class="commit-hash" data-field="hash"></span>
+                    <span class="commit-author" data-field="author"></span>
+                </div>
+                <div class="commit-date" data-field="date"></div>
+            </div>
+        </li>
+    </template>
+
+    <!-- Script decoupled from the HTML structure -->
+    <script src="../app.js"></script>
+</body>
+</html>
