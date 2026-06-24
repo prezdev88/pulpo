@@ -521,14 +521,35 @@ function renderCommits(commits, container, repoPath) {
         clone.querySelector('[data-field="message"]').textContent = commit.message;
         clone.querySelector('[data-field="author"]').textContent = commit.author;
         
-        li.addEventListener('click', () => {
+        li.addEventListener('click', async () => {
+            const isExpanded = li.classList.contains('expanded');
+            
+            // Mark as selected for the top panel
             document.querySelectorAll('.commit-row').forEach(row => {
                 row.classList.remove('selected');
-                const inline = row.querySelector('.commit-files-inline');
-                if (inline) inline.innerHTML = '';
             });
             li.classList.add('selected');
-            loadCommitDetails(commit, repoPath, li);
+
+            if (isExpanded) {
+                // Close it
+                li.classList.remove('expanded');
+                const inline = li.querySelector('.commit-files-inline');
+                if (inline) {
+                    inline.innerHTML = '';
+                    inline.style.display = 'none';
+                }
+                drawCommitGraph(commits, 'commit-graph-canvas');
+            } else {
+                // Open it
+                li.classList.add('expanded');
+                const inline = li.querySelector('.commit-files-inline') || document.createElement('div');
+                inline.className = 'commit-files-inline';
+                inline.style.display = 'block';
+                li.appendChild(inline);
+                
+                await loadCommitDetails(commit, repoPath, li);
+                drawCommitGraph(commits, 'commit-graph-canvas');
+            }
         });
 
         container.appendChild(clone);
