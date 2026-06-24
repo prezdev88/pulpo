@@ -384,10 +384,14 @@ main {
     height: 100%;
 }
 
-.icon-btn {
+#toggle-sidebar-btn {
     position: absolute;
     top: 1rem;
     left: 1rem;
+    z-index: 10;
+}
+
+.icon-btn {
     background: transparent;
     color: var(--text-color);
     border: none;
