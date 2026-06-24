@@ -657,3 +657,56 @@ main {
     font-size: 0.7rem;
     margin-top: 0.1rem;
 }
+
+/* Custom Commit File Rows */
+.commit-file-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.6rem;
+}
+
+.file-icon {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.file-basename {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.file-directory {
+    color: #888;
+    font-size: 0.8rem;
+    flex: 1; /* Pushes the status to the right */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-status-indicator {
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+.status-A { color: #4ade80; } /* green */
+.status-M { color: #fbbf24; } /* yellow */
+.status-D { color: #f87171; } /* red */
+.status-R { color: #60a5fa; } /* blue */
+
+.commit-files-inline {
+    margin-top: 0.5rem;
+    padding-left: 20px;
+    border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+.selected-file {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.diff-file-list {
+    display: none !important;
+}
+

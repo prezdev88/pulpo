@@ -501,9 +501,13 @@ function renderCommits(commits, container, repoPath) {
         clone.querySelector('[data-field="author"]').textContent = commit.author;
         
         li.addEventListener('click', () => {
-            document.querySelectorAll('.commit-row').forEach(row => row.classList.remove('selected'));
+            document.querySelectorAll('.commit-row').forEach(row => {
+                row.classList.remove('selected');
+                const inline = row.querySelector('.commit-files-inline');
+                if (inline) inline.innerHTML = '';
+            });
             li.classList.add('selected');
-            loadCommitDetails(commit, repoPath);
+            loadCommitDetails(commit, repoPath, li);
         });
 
         container.appendChild(clone);
@@ -610,7 +614,7 @@ function drawCommitGraph(commits, canvasId) {
     });
 }
 
-async function loadCommitDetails(commit, repoPath) {
+async function loadCommitDetails(commit, repoPath, commitLi) {
     document.getElementById('details-placeholder').classList.add('hidden');
     document.getElementById('commit-details-content').classList.remove('hidden');
 
@@ -619,34 +623,58 @@ async function loadCommitDetails(commit, repoPath) {
     document.getElementById('detail-author').textContent = commit.author;
     document.getElementById('detail-date').textContent = commit.date;
 
-    const fileListEl = document.getElementById('diff-file-list');
     const diffViewerEl = document.getElementById('diff-viewer');
-    
-    fileListEl.innerHTML = '<div style="padding:0.5rem;color:#888;">Loading files...</div>';
     diffViewerEl.innerHTML = '<div class="diff-placeholder">Select a file to view its diff</div>';
+
+    let inlineContainer = commitLi.querySelector('.commit-files-inline');
+    if (!inlineContainer) {
+        inlineContainer = document.createElement('div');
+        inlineContainer.className = 'commit-files-inline';
+        commitLi.appendChild(inlineContainer);
+    }
+
+    inlineContainer.innerHTML = '<div style="padding:0.5rem;color:#888;">Loading files...</div>';
 
     try {
         const files = await window.api.getCommitFiles(repoPath, commit.hash);
-        fileListEl.innerHTML = '';
+        inlineContainer.innerHTML = '';
         
         if (files.length === 0) {
-            fileListEl.innerHTML = '<div style="padding:0.5rem;color:#888;">No files changed.</div>';
+            inlineContainer.innerHTML = '<div style="padding:0.5rem;color:#888;">No files changed.</div>';
             return;
         }
 
-        files.forEach(file => {
+        files.forEach(f => {
             const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.textContent = file;
-            fileItem.addEventListener('click', async () => {
-                document.querySelectorAll('.file-item').forEach(el => el.style.background = '');
-                fileItem.style.background = 'rgba(255, 255, 255, 0.2)';
-                await loadFileDiff(repoPath, commit.hash, file);
+            fileItem.className = 'file-item commit-file-row';
+            
+            const pathParts = f.file.split('/');
+            const basename = pathParts.pop();
+            const directory = pathParts.join('/') || '.';
+
+            let icon = '📄';
+            if (basename.endsWith('.md')) icon = '📝';
+            else if (basename.endsWith('.js') || basename.endsWith('.ts')) icon = '📜';
+            else if (basename.endsWith('.json')) icon = '🔧';
+            else if (basename.endsWith('.css') || basename.endsWith('.html')) icon = '🎨';
+
+            fileItem.innerHTML = `
+                <span class="file-icon">${icon}</span>
+                <span class="file-basename">${basename}</span>
+                <span class="file-directory">${directory}</span>
+                <span class="file-status-indicator status-${f.status}">${f.status}</span>
+            `;
+
+            fileItem.addEventListener('click', async (e) => {
+                e.stopPropagation(); // Prevent closing the commit row
+                document.querySelectorAll('.file-item').forEach(el => el.classList.remove('selected-file'));
+                fileItem.classList.add('selected-file');
+                await loadFileDiff(repoPath, commit.hash, f.file);
             });
-            fileListEl.appendChild(fileItem);
+            inlineContainer.appendChild(fileItem);
         });
     } catch (err) {
-        fileListEl.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;
+        inlineContainer.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;
     }
 }
 
