@@ -220,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Zoom on diff-viewer with Ctrl + MouseWheel
     const diffViewerEl = document.getElementById('diff-viewer');
     if (diffViewerEl) {
-        let currentZoom = 0.85; // Initial font-size in rem (matches CSS)
+        let currentZoom = parseFloat(localStorage.getItem('pulpo-diff-zoom')) || 0.85;
+        diffViewerEl.style.fontSize = `${currentZoom}rem`;
+
         diffViewerEl.addEventListener('wheel', (e) => {
             if (e.ctrlKey) {
                 e.preventDefault();
@@ -233,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Cap zoom levels
                 currentZoom = Math.max(0.4, Math.min(currentZoom, 3.0));
                 diffViewerEl.style.fontSize = `${currentZoom}rem`;
+                localStorage.setItem('pulpo-diff-zoom', currentZoom.toString());
             }
         });
     }
@@ -331,6 +334,33 @@ async function loadHistoryData(repoPath) {
 
         const commits = await window.api.getCommits(repoPath);
         renderCommits(commits, commitsListEl, repoPath);
+
+        const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+        if (tab && tab.activeCommitHash && tab.activeFile && tab.activeCommitHash !== 'STAGED' && tab.activeCommitHash !== 'UNSTAGED') {
+            const commitObj = commits.find(c => c.hash === tab.activeCommitHash);
+            if (commitObj) {
+                const commitRow = Array.from(commitsListEl.querySelectorAll('.commit-row')).find(row => row.querySelector('[data-field="hash"]').textContent === tab.activeCommitHash);
+                if (commitRow) {
+                    commitRow.classList.add('selected', 'expanded');
+                    const inline = document.createElement('div');
+                    inline.className = 'commit-files-inline';
+                    inline.style.display = 'block';
+                    commitRow.appendChild(inline);
+                    
+                    await loadCommitDetails(commitObj, repoPath, commitRow);
+                    drawCommitGraph(commits, 'commit-graph-canvas');
+
+                    const fileRow = Array.from(commitRow.querySelectorAll('.commit-file-row')).find(r => {
+                        const pathParts = tab.activeFile.split('/');
+                        return r.querySelector('.file-basename').textContent === pathParts[pathParts.length - 1];
+                    });
+                    if (fileRow) {
+                        fileRow.classList.add('selected-file');
+                    }
+                    await loadFileDiff(repoPath, tab.activeCommitHash, tab.activeFile);
+                }
+            }
+        }
     } catch (error) {
         console.error(error);
     }
@@ -371,6 +401,18 @@ async function loadStagingData(repoPath) {
         const status = await window.api.getStatus(repoPath);
         renderStagingFiles(status.staged, 'staged-files-list', true, repoPath);
         renderStagingFiles(status.unstaged, 'unstaged-files-list', false, repoPath);
+
+        const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+        if (tab && tab.activeFile && (tab.activeCommitHash === 'STAGED' || tab.activeCommitHash === 'UNSTAGED')) {
+            const isStaged = tab.activeCommitHash === 'STAGED';
+            const listId = isStaged ? 'staged-files-list' : 'unstaged-files-list';
+            const container = document.getElementById(listId);
+            const fileRow = Array.from(container.querySelectorAll('li')).find(r => r.querySelector('.file-name').textContent === tab.activeFile);
+            if (fileRow) {
+                fileRow.classList.add('selected');
+                await renderLiveDiff(repoPath, tab.activeFile, isStaged);
+            }
+        }
     } catch (err) {
         console.error('Error loading staging data:', err);
     }
@@ -434,6 +476,13 @@ async function renderLiveDiff(repoPath, file, isStaged) {
     const diffViewerEl = document.getElementById('diff-viewer');
     document.getElementById('diff-file-list').innerHTML = `<div class="file-item" style="background:rgba(255,255,255,0.2)">${file}</div>`;
     diffViewerEl.innerHTML = '<div class="diff-placeholder">Loading diff...</div>';
+
+    const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+    if (tab) {
+        tab.activeCommitHash = isStaged ? 'STAGED' : 'UNSTAGED';
+        tab.activeFile = file;
+        saveTabsState();
+    }
 
     try {
         const diffText = await window.api.getLiveDiff(repoPath, file, isStaged);
@@ -781,6 +830,13 @@ async function loadFileDiff(repoPath, hash, file) {
             `;
             diffViewerEl.appendChild(row);
         });
+
+        const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+        if (tab) {
+            tab.activeCommitHash = hash;
+            tab.activeFile = file;
+            saveTabsState();
+        }
     } catch (err) {
         diffViewerEl.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;
     }
