@@ -687,28 +687,58 @@ async function loadFileDiff(repoPath, hash, file) {
         const diffText = await window.api.getFileDiff(repoPath, hash, file);
         diffViewerEl.innerHTML = '';
         
+        let oldLineNum = 0;
+        let newLineNum = 0;
+
         const lines = diffText.split('\n');
         lines.forEach(line => {
+            if (line.startsWith('@@ ')) {
+                // Parse @@ -oldStart,oldCount +newStart,newCount @@
+                const match = line.match(/@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+                if (match) {
+                    oldLineNum = parseInt(match[1], 10);
+                    newLineNum = parseInt(match[2], 10);
+                }
+                return; // skip rendering the @@ line itself
+            }
+
             // Skip metadata lines to show only code
             if (line.startsWith('diff --git') ||
                 line.startsWith('index ') ||
                 line.match(/^(new|deleted) file mode /) ||
                 line.startsWith('--- ') ||
                 line.startsWith('+++ ') ||
-                line.startsWith('@@ ')) {
+                line.startsWith('\\ No newline')) {
                 return;
             }
 
-            const span = document.createElement('span');
+            let oldNumStr = '';
+            let newNumStr = '';
+
+            const row = document.createElement('div');
             if (line.startsWith('+')) {
-                span.className = 'diff-line-add';
+                row.className = 'diff-line-add';
+                newNumStr = newLineNum++;
             } else if (line.startsWith('-')) {
-                span.className = 'diff-line-del';
+                row.className = 'diff-line-del';
+                oldNumStr = oldLineNum++;
             } else {
-                span.className = 'diff-line-normal';
+                row.className = 'diff-line-normal';
+                oldNumStr = oldLineNum++;
+                newNumStr = newLineNum++;
             }
-            span.textContent = line + '\n';
-            diffViewerEl.appendChild(span);
+
+            // Escape HTML tags in the code content
+            const safeContent = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            row.innerHTML = `
+                <div class="diff-gutters">
+                    <span class="diff-line-num">${oldNumStr}</span>
+                    <span class="diff-line-num">${newNumStr}</span>
+                </div>
+                <span class="diff-line-content">${safeContent}</span>
+            `;
+            diffViewerEl.appendChild(row);
         });
     } catch (err) {
         diffViewerEl.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;

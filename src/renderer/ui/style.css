@@ -213,25 +213,45 @@ main {
     margin-top: 2rem;
 }
 
+.diff-line-add, .diff-line-del, .diff-line-info, .diff-line-normal {
+    display: flex;
+    font-family: monospace;
+    white-space: pre;
+}
+
 .diff-line-add {
     color: #4ade80;
     background: rgba(74, 222, 128, 0.1);
-    display: block;
 }
 
 .diff-line-del {
     color: #f87171;
     background: rgba(248, 113, 113, 0.1);
-    display: block;
 }
 
 .diff-line-info {
     color: #60a5fa;
-    display: block;
 }
 
-.diff-line-normal {
-    display: block;
+.diff-gutters {
+    display: flex;
+    user-select: none;
+    color: #666;
+    background: rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    margin-right: 1rem;
+    min-width: 60px;
+}
+
+.diff-line-num {
+    width: 35px;
+    text-align: right;
+    padding-right: 0.5rem;
+    display: inline-block;
+}
+
+.diff-line-content {
+    flex: 1;
 }
 
 /* Layout Split */
