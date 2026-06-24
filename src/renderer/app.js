@@ -216,6 +216,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     restoreTabsState();
+
+    // Zoom on diff-viewer with Ctrl + MouseWheel
+    const diffViewerEl = document.getElementById('diff-viewer');
+    if (diffViewerEl) {
+        let currentZoom = 0.85; // Initial font-size in rem (matches CSS)
+        diffViewerEl.addEventListener('wheel', (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                // Zoom in (scroll up) or Zoom out (scroll down)
+                if (e.deltaY < 0) {
+                    currentZoom += 0.05;
+                } else {
+                    currentZoom -= 0.05;
+                }
+                // Cap zoom levels
+                currentZoom = Math.max(0.4, Math.min(currentZoom, 3.0));
+                diffViewerEl.style.fontSize = `${currentZoom}rem`;
+            }
+        });
+    }
 });
 
 // Funciones de Pestañas
