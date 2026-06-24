@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 
 function getCommitFiles(repoPath, hash) {
     return new Promise((resolve, reject) => {
-        exec(`git diff-tree --no-commit-id --name-status -r ${hash}`, { cwd: repoPath }, (error, stdout, stderr) => {
+        exec(`git diff-tree --root --no-commit-id --name-status -r ${hash}`, { cwd: repoPath }, (error, stdout, stderr) => {
             if (error) {
                 return reject(error);
             }
