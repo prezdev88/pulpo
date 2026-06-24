@@ -2,8 +2,8 @@ const { exec } = require('child_process');
 
 function getCommits(repoPath) {
     return new Promise((resolve, reject) => {
-        // git log format: %h||%p||%s||%an||%ad
-        const command = `git log --pretty=format:"%h||%p||%s||%an||%ad" --date=format:"%Y-%m-%d %H:%M"`;
+        // git log format: %h||%p||%s||%an <%ae>||%ad
+        const command = `git log --pretty=format:"%h||%p||%s||%an <%ae>||%ad" --date=format:"%Y-%m-%d %H:%M"`;
         
         exec(command, { cwd: repoPath }, (error, stdout, stderr) => {
             if (error) {

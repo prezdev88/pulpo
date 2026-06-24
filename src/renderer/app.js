@@ -471,6 +471,7 @@ function renderTabs() {
         const div = document.createElement('div');
         div.className = `tab-item ${tab.id === tabState.activeTabId ? 'active' : ''}`;
         div.dataset.id = tab.id;
+        div.title = tab.path; // Set the tooltip to the full path
         
         div.innerHTML = `
             <span class="tab-label">${tab.name}</span>
@@ -688,13 +689,21 @@ async function loadFileDiff(repoPath, hash, file) {
         
         const lines = diffText.split('\n');
         lines.forEach(line => {
+            // Skip metadata lines to show only code
+            if (line.startsWith('diff --git') ||
+                line.startsWith('index ') ||
+                line.match(/^(new|deleted) file mode /) ||
+                line.startsWith('--- ') ||
+                line.startsWith('+++ ') ||
+                line.startsWith('@@ ')) {
+                return;
+            }
+
             const span = document.createElement('span');
-            if (line.startsWith('+') && !line.startsWith('+++')) {
+            if (line.startsWith('+')) {
                 span.className = 'diff-line-add';
-            } else if (line.startsWith('-') && !line.startsWith('---')) {
+            } else if (line.startsWith('-')) {
                 span.className = 'diff-line-del';
-            } else if (line.startsWith('@@')) {
-                span.className = 'diff-line-info';
             } else {
                 span.className = 'diff-line-normal';
             }
