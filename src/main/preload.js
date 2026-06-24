@@ -11,5 +11,10 @@ contextBridge.exposeInMainWorld('api', {
   popStash: (repoPath) => ipcRenderer.invoke('git:stashPop', repoPath),
   getCommitFiles: (repoPath, hash) => ipcRenderer.invoke('git:getCommitFiles', repoPath, hash),
   getFileDiff: (repoPath, hash, file) => ipcRenderer.invoke('git:getFileDiff', repoPath, hash, file),
+  getStatus: (repoPath) => ipcRenderer.invoke('git:getStatus', repoPath),
+  stageFiles: (repoPath, files) => ipcRenderer.invoke('git:stageFiles', repoPath, files),
+  unstageFiles: (repoPath, files) => ipcRenderer.invoke('git:unstageFiles', repoPath, files),
+  commitChanges: (repoPath, message) => ipcRenderer.invoke('git:commitChanges', repoPath, message),
+  getLiveDiff: (repoPath, file, isStaged) => ipcRenderer.invoke('git:getLiveDiff', repoPath, file, isStaged),
   onOpenRepo: (callback) => ipcRenderer.on('app:openRepo', (_event, value) => callback(value))
 });

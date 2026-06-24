@@ -9,6 +9,11 @@ const stashChanges = require('../core/stashChangesUseCase');
 const popStash = require('../core/popStashUseCase');
 const getCommitFiles = require('../core/getCommitFilesUseCase');
 const getFileDiff = require('../core/getFileDiffUseCase');
+const { getStatus } = require('../core/getStatusUseCase');
+const { stageFiles } = require('../core/stageFilesUseCase');
+const { unstageFiles } = require('../core/unstageFilesUseCase');
+const { commitChanges } = require('../core/commitChangesUseCase');
+const { getLiveDiff } = require('../core/getLiveDiffUseCase');
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -88,6 +93,26 @@ app.whenReady().then(() => {
 
   ipcMain.handle('git:getFileDiff', async (event, repoPath, hash, file) => {
     return await getFileDiff(repoPath, hash, file);
+  });
+
+  ipcMain.handle('git:getStatus', async (event, repoPath) => {
+    return await getStatus(repoPath);
+  });
+
+  ipcMain.handle('git:stageFiles', async (event, repoPath, files) => {
+    return await stageFiles(repoPath, files);
+  });
+
+  ipcMain.handle('git:unstageFiles', async (event, repoPath, files) => {
+    return await unstageFiles(repoPath, files);
+  });
+
+  ipcMain.handle('git:commitChanges', async (event, repoPath, message) => {
+    return await commitChanges(repoPath, message);
+  });
+
+  ipcMain.handle('git:getLiveDiff', async (event, repoPath, file, isStaged) => {
+    return await getLiveDiff(repoPath, file, isStaged);
   });
 
   createWindow();

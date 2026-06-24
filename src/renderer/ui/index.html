@@ -28,20 +28,57 @@
             <!-- Vista 2: Historial de Commits -->
             <div id="commits-view" class="hidden layout-split">
                 <aside class="commits-sidebar" id="commits-sidebar">
-                    <header class="repo-header">
-                        <h2 id="active-repo-name">Repository</h2>
-                        <div class="repo-actions">
-                            <select id="branch-selector" class="glass-select"></select>
-                            <button id="new-branch-btn" class="glass-btn" title="Create New Branch">+</button>
-                            <button id="stash-btn" class="glass-btn" title="Stash Changes">📦</button>
-                            <button id="pop-stash-btn" class="glass-btn" title="Pop Stash">📥</button>
+                    <!-- Sidebar Navigation Tabs -->
+                    <div class="sidebar-toggle-bar">
+                        <button id="mode-history-btn" class="sidebar-tab active">🕒 History</button>
+                        <button id="mode-staging-btn" class="sidebar-tab">📝 Source Control</button>
+                    </div>
+
+                    <!-- History View -->
+                    <div id="history-view-container" class="sidebar-view">
+                        <header class="repo-header">
+                            <h2 id="active-repo-name">Repository</h2>
+                            <div class="repo-actions">
+                                <select id="branch-selector" class="glass-select"></select>
+                                <button id="new-branch-btn" class="glass-btn" title="Create New Branch">+</button>
+                                <button id="stash-btn" class="glass-btn" title="Stash Changes">📦</button>
+                                <button id="pop-stash-btn" class="glass-btn" title="Pop Stash">📥</button>
+                            </div>
+                        </header>
+                        <div class="commits-table-container" style="position: relative;">
+                            <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
+                            <ul class="minimalist-tree" id="commits-tbody">
+                                <!-- Commits renderizados irán aquí -->
+                            </ul>
                         </div>
-                    </header>
-                    <div class="commits-table-container" style="position: relative;">
-                        <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
-                        <ul class="minimalist-tree" id="commits-tbody">
-                            <!-- Commits renderizados irán aquí -->
-                        </ul>
+                    </div>
+
+                    <!-- Staging View -->
+                    <div id="staging-view-container" class="sidebar-view hidden">
+                        <div class="commit-box">
+                            <textarea id="commit-message-input" class="commit-textarea" placeholder="Message (Cmd+Enter to commit)"></textarea>
+                            <button id="commit-execute-btn" class="primary-btn commit-submit-btn">Commit</button>
+                        </div>
+                        
+                        <div class="staging-accordion">
+                            <h4 class="accordion-header">
+                                <span>Staged Changes</span>
+                                <span class="accordion-actions">
+                                    <button id="unstage-all-btn" class="icon-btn" title="Unstage All">-</button>
+                                </span>
+                            </h4>
+                            <ul id="staged-files-list" class="file-list"></ul>
+                        </div>
+                        
+                        <div class="staging-accordion">
+                            <h4 class="accordion-header">
+                                <span>Changes</span>
+                                <span class="accordion-actions">
+                                    <button id="stage-all-btn" class="icon-btn" title="Stage All">+</button>
+                                </span>
+                            </h4>
+                            <ul id="unstaged-files-list" class="file-list"></ul>
+                        </div>
                     </div>
                 </aside>
                 <div class="resizer" id="sidebar-resizer"></div>
@@ -81,6 +118,17 @@
                     <span class="commit-author" data-field="author"></span>
                 </div>
                 <div class="commit-date" data-field="date"></div>
+            </div>
+        </li>
+    </template>
+
+    <!-- Template for Source Control Files -->
+    <template id="staging-file-template">
+        <li class="staging-file-row">
+            <span class="file-status"></span>
+            <span class="file-name"></span>
+            <div class="file-actions">
+                <button class="stage-toggle-btn icon-btn"></button>
             </div>
         </li>
     </template>

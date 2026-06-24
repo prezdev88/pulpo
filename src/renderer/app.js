@@ -173,6 +173,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Staging / Commit Controls
+    document.getElementById('mode-history-btn').addEventListener('click', () => setSidebarMode('history'));
+    document.getElementById('mode-staging-btn').addEventListener('click', () => setSidebarMode('staging'));
+
+    document.getElementById('stage-all-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        try {
+            await window.api.stageFiles(activeRepoPath, ['.']);
+            loadStagingData(activeRepoPath);
+        } catch(e) { alert(e.message); }
+    });
+
+    document.getElementById('unstage-all-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        try {
+            await window.api.unstageFiles(activeRepoPath, ['.']);
+            loadStagingData(activeRepoPath);
+        } catch(e) { alert(e.message); }
+    });
+
+    document.getElementById('commit-message-input').addEventListener('input', (e) => {
+        const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+        if (tab) {
+            tab.commitMessage = e.target.value;
+            saveTabsState();
+        }
+    });
+
+    document.getElementById('commit-execute-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        const msg = document.getElementById('commit-message-input').value.trim();
+        if (!msg) { alert('Please enter a commit message.'); return; }
+        try {
+            await window.api.commitChanges(activeRepoPath, msg);
+            document.getElementById('commit-message-input').value = '';
+            const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+            if (tab) tab.commitMessage = '';
+            saveTabsState();
+            loadStagingData(activeRepoPath);
+        } catch(e) { alert(e.message); }
+    });
+
     restoreTabsState();
 });
 
@@ -210,7 +252,13 @@ function openRepository(repoPath) {
     }
 
     const id = Date.now().toString();
-    tabState.tabs.push({ id, path: repoPath, name: folderName });
+    tabState.tabs.push({ 
+        id, 
+        path: repoPath, 
+        name: folderName,
+        sidebarMode: 'history',
+        commitMessage: ''
+    });
     saveTabsState();
     switchTab(id);
 }
@@ -234,10 +282,23 @@ function switchTab(id) {
     renderTabs();
     saveTabsState();
     
-    // RNF03: Only re-render when switching (re-fetching for now to ensure consistency)
+    // Apply saved mode and message
+    document.getElementById('commit-message-input').value = tab.commitMessage || '';
+    setSidebarMode(tab.sidebarMode || 'history');
+    
+    // RNF03: Only re-render when switching
+    if (tab.sidebarMode === 'staging') {
+        loadStagingData(tab.path);
+    } else {
+        loadHistoryData(tab.path);
+    }
+}
+
+async function loadHistoryData(repoPath) {
     const commitsListEl = document.getElementById('commits-tbody');
     commitsListEl.innerHTML = '<li style="text-align: center; color: #888; padding: 2rem;">Loading commits...</li>';
-    window.api.getBranches(tab.path).then(branchData => {
+    try {
+        const branchData = await window.api.getBranches(repoPath);
         const branchSelector = document.getElementById('branch-selector');
         branchSelector.innerHTML = '';
         branchData.branches.forEach(branch => {
@@ -247,11 +308,140 @@ function switchTab(id) {
             if (branch === branchData.activeBranch) option.selected = true;
             branchSelector.appendChild(option);
         });
-    }).catch(console.error);
 
-    window.api.getCommits(tab.path).then(commits => {
-        renderCommits(commits, commitsListEl, tab.path);
-    }).catch(console.error);
+        const commits = await window.api.getCommits(repoPath);
+        renderCommits(commits, commitsListEl, repoPath);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// === STAGING LOGIC ===
+
+function setSidebarMode(mode) {
+    if (!activeRepoPath) return;
+    const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+    if (tab) {
+        tab.sidebarMode = mode;
+        saveTabsState();
+    }
+
+    const historyBtn = document.getElementById('mode-history-btn');
+    const stagingBtn = document.getElementById('mode-staging-btn');
+    const historyView = document.getElementById('history-view-container');
+    const stagingView = document.getElementById('staging-view-container');
+
+    if (mode === 'history') {
+        historyBtn.classList.add('active');
+        stagingBtn.classList.remove('active');
+        historyView.classList.remove('hidden');
+        stagingView.classList.add('hidden');
+        loadHistoryData(activeRepoPath);
+    } else {
+        stagingBtn.classList.add('active');
+        historyBtn.classList.remove('active');
+        stagingView.classList.remove('hidden');
+        historyView.classList.add('hidden');
+        loadStagingData(activeRepoPath);
+    }
+}
+
+async function loadStagingData(repoPath) {
+    try {
+        const status = await window.api.getStatus(repoPath);
+        renderStagingFiles(status.staged, 'staged-files-list', true, repoPath);
+        renderStagingFiles(status.unstaged, 'unstaged-files-list', false, repoPath);
+    } catch (err) {
+        console.error('Error loading staging data:', err);
+    }
+}
+
+function renderStagingFiles(files, containerId, isStaged, repoPath) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    if (files.length === 0) {
+        container.innerHTML = '<li style="padding: 0.5rem 1rem; color: #666; font-size: 0.8rem;">No files</li>';
+        return;
+    }
+
+    const template = document.getElementById('staging-file-template');
+    
+    files.forEach(f => {
+        const clone = template.content.cloneNode(true);
+        const li = clone.querySelector('li');
+        
+        clone.querySelector('.file-status').textContent = f.status;
+        clone.querySelector('.file-name').textContent = f.file;
+        
+        const btn = clone.querySelector('.stage-toggle-btn');
+        btn.textContent = isStaged ? '-' : '+';
+        btn.title = isStaged ? 'Unstage' : 'Stage';
+        
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent opening diff
+            try {
+                if (isStaged) {
+                    await window.api.unstageFiles(repoPath, [f.file]);
+                } else {
+                    await window.api.stageFiles(repoPath, [f.file]);
+                }
+                loadStagingData(repoPath);
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        li.addEventListener('click', async () => {
+            document.querySelectorAll('.staging-file-row').forEach(row => row.classList.remove('selected'));
+            li.classList.add('selected');
+            await renderLiveDiff(repoPath, f.file, isStaged);
+        });
+
+        container.appendChild(clone);
+    });
+}
+
+async function renderLiveDiff(repoPath, file, isStaged) {
+    document.getElementById('details-placeholder').classList.add('hidden');
+    document.getElementById('commit-details-content').classList.remove('hidden');
+    
+    document.getElementById('detail-message').textContent = 'Live Changes';
+    document.getElementById('detail-hash').textContent = isStaged ? 'Staged' : 'Unstaged';
+    document.getElementById('detail-author').textContent = 'Working Directory';
+    document.getElementById('detail-date').textContent = file;
+
+    const diffViewerEl = document.getElementById('diff-viewer');
+    document.getElementById('diff-file-list').innerHTML = `<div class="file-item" style="background:rgba(255,255,255,0.2)">${file}</div>`;
+    diffViewerEl.innerHTML = '<div class="diff-placeholder">Loading diff...</div>';
+
+    try {
+        const diffText = await window.api.getLiveDiff(repoPath, file, isStaged);
+        diffViewerEl.innerHTML = '';
+        
+        if (!diffText) {
+            diffViewerEl.innerHTML = '<div style="padding:1rem;">No visible diff (maybe binary or empty).</div>';
+            return;
+        }
+
+        const lines = diffText.split('\n');
+        lines.forEach(line => {
+            const span = document.createElement('span');
+            if (line.startsWith('+') && !line.startsWith('+++')) {
+                span.className = 'diff-line-add';
+            } else if (line.startsWith('-') && !line.startsWith('---')) {
+                span.className = 'diff-line-del';
+            } else if (line.startsWith('@@')) {
+                span.className = 'diff-line-info';
+            } else {
+                span.className = 'diff-line-normal';
+            }
+            span.textContent = line + '\n';
+            diffViewerEl.appendChild(span);
+        });
+    } catch (err) {
+        diffViewerEl.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;
+    }
 }
 
 function closeTab(id) {
