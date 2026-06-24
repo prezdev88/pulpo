@@ -131,6 +131,18 @@
         </li>
     </template>
 
+    <!-- Modal for New Branch -->
+    <div id="branch-modal" class="modal hidden">
+        <div class="modal-content" style="width: 400px;">
+            <h3>Create New Branch</h3>
+            <input type="text" id="branch-name-input" class="glass-select" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem;" placeholder="Branch name...">
+            <div style="text-align: right;">
+                <button id="cancel-branch-btn" class="glass-btn" style="margin-right: 0.5rem;">Cancel</button>
+                <button id="confirm-branch-btn" class="primary-btn">Create</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Script decoupled from the HTML structure -->
     <script src="../app.js"></script>
 </body>

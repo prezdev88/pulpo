@@ -138,12 +138,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('new-branch-btn').addEventListener('click', async () => {
+    document.getElementById('new-branch-btn').addEventListener('click', () => {
         if (!activeRepoPath) return;
-        const name = prompt('Enter new branch name:');
+        const modal = document.getElementById('branch-modal');
+        const input = document.getElementById('branch-name-input');
+        input.value = '';
+        modal.classList.remove('hidden');
+        input.focus();
+    });
+
+    document.getElementById('cancel-branch-btn').addEventListener('click', () => {
+        document.getElementById('branch-modal').classList.add('hidden');
+    });
+
+    document.getElementById('confirm-branch-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        const name = document.getElementById('branch-name-input').value.trim();
         if (name) {
             try {
                 await window.api.createBranch(activeRepoPath, name);
+                document.getElementById('branch-modal').classList.add('hidden');
                 await loadRepoData(activeRepoPath);
             } catch (error) {
                 alert('Error creating branch:\n' + error.message);
