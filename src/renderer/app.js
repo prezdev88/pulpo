@@ -151,27 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('stash-btn').addEventListener('click', async () => {
-        if (!activeRepoPath) return;
-        try {
-            const result = await window.api.stashChanges(activeRepoPath);
-            alert('Stash Output:\n' + result);
-            await loadRepoData(activeRepoPath);
-        } catch (error) {
-            alert('Error stashing:\n' + error.message);
-        }
-    });
-
-    document.getElementById('pop-stash-btn').addEventListener('click', async () => {
-        if (!activeRepoPath) return;
-        try {
-            const result = await window.api.popStash(activeRepoPath);
-            alert('Stash Pop Output:\n' + result);
-            await loadRepoData(activeRepoPath);
-        } catch (error) {
-            alert('Error popping stash:\n' + error.message);
-        }
-    });
 
     // Staging / Commit Controls
     document.getElementById('mode-history-btn').addEventListener('click', () => setSidebarMode('history'));
