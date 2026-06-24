@@ -14,6 +14,30 @@ const { stageFiles } = require('../core/stageFilesUseCase');
 const { unstageFiles } = require('../core/unstageFilesUseCase');
 const { commitChanges } = require('../core/commitChangesUseCase');
 const { getLiveDiff } = require('../core/getLiveDiffUseCase');
+const gitExec = require('../core/gitExec');
+
+let logWindow = null;
+
+function openLogWindow() {
+  if (logWindow) {
+    logWindow.focus();
+    return;
+  }
+  logWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    title: "Git Execution Logs",
+    icon: path.join(__dirname, '../assets/logo.png'),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+  logWindow.loadFile(path.join(__dirname, '../renderer/ui/git-logs.html'));
+  logWindow.on('closed', () => {
+    logWindow = null;
+  });
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -46,6 +70,15 @@ function createWindow() {
         { type: 'separator' },
         { role: 'quit' }
       ]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        {
+          label: 'View Git Logs',
+          click: openLogWindow
+        }
+      ]
     }
   ];
   const menu = Menu.buildFromTemplate(template);
@@ -53,6 +86,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('git:getLogs', () => {
+    return gitExec.getLogs();
+  });
+
   ipcMain.handle('dialog:openDirectory', async () => {
     return await selectRepository();
   });

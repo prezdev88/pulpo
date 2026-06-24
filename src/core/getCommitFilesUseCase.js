@@ -1,4 +1,4 @@
-const { exec } = require('child_process');
+const { exec } = require('./gitExec');
 
 function getCommitFiles(repoPath, hash) {
     return new Promise((resolve, reject) => {
