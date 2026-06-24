@@ -19,6 +19,7 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1024,
     height: 768,
+    icon: path.join(__dirname, '../assets/logo.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -44,13 +45,6 @@ function createWindow() {
         },
         { type: 'separator' },
         { role: 'quit' }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' },
-        { role: 'toggleDevTools' }
       ]
     }
   ];
