@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pulpo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,7 +22,7 @@
                 <div id="tabs-container" class="tabs-container">
                     <!-- Tabs go here -->
                 </div>
-                <button id="add-tab-btn" class="add-tab-btn" title="Open Repository">+</button>
+                <button id="add-tab-btn" class="add-tab-btn" title="Open Repository"><i class="fa-solid fa-plus"></i></button>
             </nav>
 
             <!-- Vista 2: Historial de Commits -->
@@ -29,8 +30,8 @@
                 <aside class="commits-sidebar" id="commits-sidebar">
                     <!-- Sidebar Navigation Tabs -->
                     <div class="sidebar-toggle-bar">
-                        <button id="mode-history-btn" class="sidebar-tab active">🕒 History</button>
-                        <button id="mode-staging-btn" class="sidebar-tab">📝 Source Control</button>
+                        <button id="mode-history-btn" class="sidebar-tab active"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
+                        <button id="mode-staging-btn" class="sidebar-tab"><i class="fa-solid fa-file-pen"></i> Source Control</button>
                     </div>
 
                     <!-- History View -->
@@ -39,7 +40,7 @@
                             <h2 id="active-repo-name">Repository</h2>
                             <div class="repo-actions">
                                 <select id="branch-selector" class="glass-select"></select>
-                                <button id="new-branch-btn" class="glass-btn" title="Create New Branch">+</button>
+                                <button id="new-branch-btn" class="glass-btn" title="Create New Branch"><i class="fa-solid fa-plus"></i></button>
 
                             </div>
                         </header>
@@ -62,7 +63,7 @@
                             <h4 class="accordion-header">
                                 <span>Staged Changes</span>
                                 <span class="accordion-actions">
-                                    <button id="unstage-all-btn" class="icon-btn" title="Unstage All">-</button>
+                                    <button id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></button>
                                 </span>
                             </h4>
                             <ul id="staged-files-list" class="file-list"></ul>
@@ -72,7 +73,7 @@
                             <h4 class="accordion-header">
                                 <span>Changes</span>
                                 <span class="accordion-actions">
-                                    <button id="stage-all-btn" class="icon-btn" title="Stage All">+</button>
+                                    <button id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></button>
                                 </span>
                             </h4>
                             <ul id="unstaged-files-list" class="file-list"></ul>
@@ -81,7 +82,7 @@
                 </aside>
                 <div class="resizer" id="sidebar-resizer"></div>
                 <section class="commit-details-pane">
-                    <button id="toggle-sidebar-btn" class="icon-btn" title="Toggle Sidebar">☰</button>
+                    <button id="toggle-sidebar-btn" class="icon-btn" title="Toggle Sidebar"><i class="fa-solid fa-bars"></i></button>
                     <div id="commit-details-content" class="hidden">
                         <div class="commit-header">
                             <h3 id="detail-message"></h3>

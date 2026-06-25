@@ -430,7 +430,7 @@ function renderStagingFiles(files, containerId, isStaged, repoPath) {
         clone.querySelector('.file-name').textContent = f.file;
         
         const btn = clone.querySelector('.stage-toggle-btn');
-        btn.textContent = isStaged ? '-' : '+';
+        btn.innerHTML = isStaged ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-plus"></i>';
         btn.title = isStaged ? 'Unstage' : 'Stage';
         
         btn.addEventListener('click', async (e) => {
@@ -736,11 +736,11 @@ async function loadCommitDetails(commit, repoPath, commitLi) {
             const basename = pathParts.pop();
             const directory = pathParts.join('/') || '.';
 
-            let icon = '📄';
-            if (basename.endsWith('.md')) icon = '📝';
-            else if (basename.endsWith('.js') || basename.endsWith('.ts')) icon = '📜';
-            else if (basename.endsWith('.json')) icon = '🔧';
-            else if (basename.endsWith('.css') || basename.endsWith('.html')) icon = '🎨';
+            let icon = '<i class="fa-solid fa-file"></i>';
+            if (basename.endsWith('.md')) icon = '<i class="fa-solid fa-file-lines"></i>';
+            else if (basename.endsWith('.js') || basename.endsWith('.ts')) icon = '<i class="fa-brands fa-js"></i>';
+            else if (basename.endsWith('.json')) icon = '<i class="fa-solid fa-file-code"></i>';
+            else if (basename.endsWith('.css') || basename.endsWith('.html')) icon = '<i class="fa-brands fa-html5"></i>';
 
             fileItem.innerHTML = `
                 <span class="file-icon">${icon}</span>
