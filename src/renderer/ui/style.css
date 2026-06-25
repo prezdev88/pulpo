@@ -399,6 +399,18 @@ main {
     background: var(--accent-color);
 }
 
+.horizontal-resizer {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: row-resize;
+    z-index: 100;
+    transition: background 0.2s;
+}
+
+.horizontal-resizer:hover, .horizontal-resizer.resizing {
+    background: var(--accent-color);
+}
+
 .commit-details-pane {
     flex: 1;
     position: relative;

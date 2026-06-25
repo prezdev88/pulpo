@@ -74,18 +74,18 @@
                                 <ul id="staged-files-list" class="file-list"></ul>
                             </div>
                         </div>
-
-                        <!-- History View (Merged) -->
-                        <div class="staging-accordion" style="margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1rem; flex: 1; min-height: 0;">
-                            <h4 class="accordion-header">
-                                <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Commits</span>
-                            </h4>
-                            <div class="accordion-content commits-table-container" style="position: relative;">
-                                <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
-                                <ul class="minimalist-tree" id="commits-tbody">
-                                    <!-- Commits renderizados irán aquí -->
-                                </ul>
-                            </div>
+                    </div>
+                    <div class="horizontal-resizer" id="commits-resizer"></div>
+                    <!-- History View (Merged) -->
+                    <div class="staging-accordion" id="commits-panel" style="display: flex; flex-direction: column; height: 300px; min-height: 24px; border-top: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0; background-color: var(--bg-color);">
+                        <h4 class="accordion-header">
+                            <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Commits</span>
+                        </h4>
+                        <div class="accordion-content commits-table-container" style="position: relative; flex: 1; overflow-y: auto;">
+                            <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
+                            <ul class="minimalist-tree" id="commits-tbody">
+                                <!-- Commits renderizados irán aquí -->
+                            </ul>
                         </div>
                     </div>
                 </aside>

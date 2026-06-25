@@ -126,6 +126,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Commits Panel Resizer Logic
+    const commitsPanel = document.getElementById('commits-panel');
+    const hResizer = document.getElementById('commits-resizer');
+    
+    if (hResizer && commitsPanel) {
+        let isHResizing = false;
+        
+        hResizer.addEventListener('mousedown', (e) => {
+            if (commitsPanel.classList.contains('collapsed-panel')) return;
+            isHResizing = true;
+            hResizer.classList.add('resizing');
+            document.body.style.cursor = 'row-resize';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isHResizing) return;
+            const sidebar = document.querySelector('.commits-sidebar');
+            const sidebarRect = sidebar.getBoundingClientRect();
+            const newHeight = sidebarRect.bottom - e.clientY;
+            
+            if (newHeight >= 100 && newHeight <= sidebarRect.height * 0.8) {
+                commitsPanel.style.height = `${newHeight}px`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isHResizing) {
+                isHResizing = false;
+                hResizer.classList.remove('resizing');
+                document.body.style.cursor = '';
+            }
+        });
+    }
+
     // Branch & Stash Controls
     document.getElementById('branch-selector').addEventListener('change', async (e) => {
         if (!activeRepoPath) return;
@@ -174,6 +209,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const content = header.nextElementSibling;
             if (content && content.classList.contains('accordion-content')) {
                 content.classList.toggle('collapsed');
+            }
+            if (header.parentElement.id === 'commits-panel') {
+                if (header.classList.contains('collapsed')) {
+                    header.parentElement.dataset.prevHeight = header.parentElement.style.height;
+                    header.parentElement.style.height = '24px';
+                    header.parentElement.classList.add('collapsed-panel');
+                } else {
+                    header.parentElement.style.height = header.parentElement.dataset.prevHeight || '300px';
+                    header.parentElement.classList.remove('collapsed-panel');
+                }
             }
         });
     });
