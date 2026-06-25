@@ -384,8 +384,9 @@ async function loadStagingData(repoPath) {
         const stagedAcc = document.getElementById('staged-accordion');
         if (container && changesAcc && stagedAcc) {
             if (status.staged.length === 0) {
-                container.insertBefore(changesAcc, stagedAcc);
+                stagedAcc.classList.add('hidden');
             } else {
+                stagedAcc.classList.remove('hidden');
                 container.insertBefore(stagedAcc, changesAcc);
             }
         }
