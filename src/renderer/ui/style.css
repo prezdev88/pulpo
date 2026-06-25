@@ -540,6 +540,7 @@ main {
     flex: 1;
     min-height: 0;
     width: 100%;
+    container-type: inline-size;
 }
 
 .commit-box {
@@ -731,28 +732,29 @@ main {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
     overflow: hidden;
     width: 100%;
-    min-height: 24px;
+    height: 24px;
+}
+
+.commit-text-block {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .commit-message {
     color: #e0e0e0;
     font-size: 0.85rem;
     font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-shrink: 1;
 }
 
 .commit-author {
     color: #888;
     font-size: 0.75rem;
     font-weight: normal;
-    white-space: nowrap;
-    flex-shrink: 0;
+    margin-left: 0.5rem;
 }
 
 /* Custom Commit File Rows */
