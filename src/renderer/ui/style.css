@@ -64,7 +64,7 @@ main {
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    background: radial-gradient(circle at top left, #2c2c2c, var(--bg-color));
+    background: var(--bg-color);
 }
 
 .landing-card {
@@ -87,7 +87,7 @@ main {
 }
 
 .primary-btn {
-    background: linear-gradient(135deg, #bb86fc, #6200ea);
+    background: #6200ea;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -95,13 +95,12 @@ main {
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 15px rgba(98, 0, 234, 0.4);
+    transition: transform 0.2s, background 0.2s;
 }
 
 .primary-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(98, 0, 234, 0.6);
+    filter: brightness(1.2);
 }
 
 .primary-btn:active {
