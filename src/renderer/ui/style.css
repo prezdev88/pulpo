@@ -423,11 +423,8 @@ main {
     height: 100%;
 }
 
-#toggle-sidebar-btn {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 10;
+.commit-header h3 {
+    margin-top: 0;
 }
 
 .icon-btn {

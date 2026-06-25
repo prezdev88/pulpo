@@ -83,15 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Old openRepoBtn listener removed to use the centralized openRepository function.
 
-    const toggleBtn = document.getElementById('toggle-sidebar-btn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            const sidebar = document.querySelector('.commits-sidebar');
-            if (sidebar) sidebar.classList.toggle('hidden-sidebar');
-            const resizerEl = document.getElementById('sidebar-resizer');
-            if (resizerEl) resizerEl.classList.toggle('hidden-sidebar');
-        });
-    }
+
 
     // Sidebar Resizer Logic
     const sidebar = document.getElementById('commits-sidebar');
