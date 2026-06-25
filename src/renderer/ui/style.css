@@ -428,6 +428,11 @@ main {
     transition: opacity 0.2s;
 }
 
+.accordion-actions .icon-btn {
+    font-size: 0.9rem;
+    padding: 0 0.2rem;
+}
+
 .icon-btn:hover {
     opacity: 1;
 }
@@ -588,6 +593,30 @@ main {
     position: sticky;
     top: 0;
     z-index: 2;
+    cursor: pointer;
+    user-select: none;
+}
+
+.accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.accordion-icon {
+    transition: transform 0.2s ease;
+}
+
+.accordion-header.collapsed .accordion-icon {
+    transform: rotate(-90deg);
+}
+
+.accordion-content {
+    display: block;
+}
+
+.accordion-content.collapsed {
+    display: none;
 }
 
 .file-list {
@@ -633,11 +662,15 @@ main {
 }
 
 .file-actions {
-    display: none;
+    display: flex;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
 }
 
 .staging-file-row:hover .file-actions {
-    display: flex;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .stage-toggle-btn {

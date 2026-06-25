@@ -166,6 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+    // Accordion Toggle Logic
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', (e) => {
+            if (e.target.closest('.accordion-actions')) return;
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            if (content && content.classList.contains('accordion-content')) {
+                content.classList.toggle('collapsed');
+            }
+        });
+    });
+
     // Staging / Commit Controls
 
     document.getElementById('stage-all-btn').addEventListener('click', async () => {

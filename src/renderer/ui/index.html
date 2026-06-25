@@ -47,30 +47,39 @@
                         
                         <div class="staging-accordion">
                             <h4 class="accordion-header">
-                                <span>Staged Changes</span>
+                                <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Staged Changes</span>
                                 <span class="accordion-actions">
                                     <button id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></button>
                                 </span>
                             </h4>
-                            <ul id="staged-files-list" class="file-list"></ul>
+                            <div class="accordion-content">
+                                <ul id="staged-files-list" class="file-list"></ul>
+                            </div>
                         </div>
                         
                         <div class="staging-accordion">
                             <h4 class="accordion-header">
-                                <span>Changes</span>
+                                <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Changes</span>
                                 <span class="accordion-actions">
                                     <button id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></button>
                                 </span>
                             </h4>
-                            <ul id="unstaged-files-list" class="file-list"></ul>
+                            <div class="accordion-content">
+                                <ul id="unstaged-files-list" class="file-list"></ul>
+                            </div>
                         </div>
 
                         <!-- History View (Merged) -->
-                        <div class="commits-table-container" style="position: relative; margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1rem;">
-                            <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
-                            <ul class="minimalist-tree" id="commits-tbody">
-                                <!-- Commits renderizados irán aquí -->
-                            </ul>
+                        <div class="staging-accordion" style="margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1rem; flex: 1; min-height: 0;">
+                            <h4 class="accordion-header">
+                                <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Commits</span>
+                            </h4>
+                            <div class="accordion-content commits-table-container" style="position: relative;">
+                                <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
+                                <ul class="minimalist-tree" id="commits-tbody">
+                                    <!-- Commits renderizados irán aquí -->
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </aside>
