@@ -709,7 +709,7 @@ main {
 
 .commit-graph-canvas {
     position: absolute;
-    top: 1rem;
+    top: 0;
     left: 0;
     width: 60px;
     z-index: 1;
