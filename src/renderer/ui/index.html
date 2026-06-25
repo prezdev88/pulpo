@@ -28,14 +28,8 @@
             <!-- Vista 2: Historial de Commits -->
             <div id="commits-view" class="hidden layout-split">
                 <aside class="commits-sidebar" id="commits-sidebar">
-                    <!-- Sidebar Navigation Tabs -->
-                    <div class="sidebar-toggle-bar">
-                        <button id="mode-history-btn" class="sidebar-tab active"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
-                        <button id="mode-staging-btn" class="sidebar-tab"><i class="fa-solid fa-file-pen"></i> Source Control</button>
-                    </div>
-
-                    <!-- History View -->
-                    <div id="history-view-container" class="sidebar-view">
+                    <!-- Unified View -->
+                    <div id="unified-view-container" class="sidebar-view">
                         <header class="repo-header">
                             <h2 id="active-repo-name">Repository</h2>
                             <div class="repo-actions">
@@ -44,16 +38,8 @@
 
                             </div>
                         </header>
-                        <div class="commits-table-container" style="position: relative;">
-                            <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
-                            <ul class="minimalist-tree" id="commits-tbody">
-                                <!-- Commits renderizados irán aquí -->
-                            </ul>
-                        </div>
-                    </div>
 
-                    <!-- Staging View -->
-                    <div id="staging-view-container" class="sidebar-view hidden">
+                        <!-- Staging View (Merged) -->
                         <div class="commit-box">
                             <textarea id="commit-message-input" class="commit-textarea" placeholder="Message (Cmd+Enter to commit)"></textarea>
                             <button id="commit-execute-btn" class="primary-btn commit-submit-btn">Commit</button>
@@ -77,6 +63,14 @@
                                 </span>
                             </h4>
                             <ul id="unstaged-files-list" class="file-list"></ul>
+                        </div>
+
+                        <!-- History View (Merged) -->
+                        <div class="commits-table-container" style="position: relative; margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1rem;">
+                            <canvas id="commit-graph-canvas" class="commit-graph-canvas"></canvas>
+                            <ul class="minimalist-tree" id="commits-tbody">
+                                <!-- Commits renderizados irán aquí -->
+                            </ul>
                         </div>
                     </div>
                 </aside>

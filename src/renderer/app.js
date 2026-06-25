@@ -167,8 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Staging / Commit Controls
-    document.getElementById('mode-history-btn').addEventListener('click', () => setSidebarMode('history'));
-    document.getElementById('mode-staging-btn').addEventListener('click', () => setSidebarMode('staging'));
 
     document.getElementById('stage-all-btn').addEventListener('click', async () => {
         if (!activeRepoPath) return;
@@ -205,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tab) tab.commitMessage = '';
             saveTabsState();
             loadStagingData(activeRepoPath);
+            loadHistoryData(activeRepoPath);
         } catch(e) { alert(e.message); }
     });
 
@@ -298,16 +297,12 @@ function switchTab(id) {
     renderTabs();
     saveTabsState();
     
-    // Apply saved mode and message
+    // Apply saved message
     document.getElementById('commit-message-input').value = tab.commitMessage || '';
-    setSidebarMode(tab.sidebarMode || 'history');
     
-    // RNF03: Only re-render when switching
-    if (tab.sidebarMode === 'staging') {
-        loadStagingData(tab.path);
-    } else {
-        loadHistoryData(tab.path);
-    }
+    // RNF03: Re-render when switching
+    loadStagingData(tab.path);
+    loadHistoryData(tab.path);
 }
 
 async function loadHistoryData(repoPath) {
@@ -361,33 +356,7 @@ async function loadHistoryData(repoPath) {
 
 // === STAGING LOGIC ===
 
-function setSidebarMode(mode) {
-    if (!activeRepoPath) return;
-    const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
-    if (tab) {
-        tab.sidebarMode = mode;
-        saveTabsState();
-    }
 
-    const historyBtn = document.getElementById('mode-history-btn');
-    const stagingBtn = document.getElementById('mode-staging-btn');
-    const historyView = document.getElementById('history-view-container');
-    const stagingView = document.getElementById('staging-view-container');
-
-    if (mode === 'history') {
-        historyBtn.classList.add('active');
-        stagingBtn.classList.remove('active');
-        historyView.classList.remove('hidden');
-        stagingView.classList.add('hidden');
-        loadHistoryData(activeRepoPath);
-    } else {
-        stagingBtn.classList.add('active');
-        historyBtn.classList.remove('active');
-        stagingView.classList.remove('hidden');
-        historyView.classList.add('hidden');
-        loadStagingData(activeRepoPath);
-    }
-}
 
 async function loadStagingData(repoPath) {
     try {
