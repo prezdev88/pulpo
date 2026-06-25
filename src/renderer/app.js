@@ -377,6 +377,19 @@ async function loadStagingData(repoPath) {
         renderStagingFiles(status.unstaged, 'unstaged-files-list', false, repoPath);
 
         const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
+        
+        // Dynamically reorder accordions
+        const container = document.getElementById('unified-view-container');
+        const changesAcc = document.getElementById('changes-accordion');
+        const stagedAcc = document.getElementById('staged-accordion');
+        if (container && changesAcc && stagedAcc) {
+            if (status.staged.length === 0) {
+                container.insertBefore(changesAcc, stagedAcc);
+            } else {
+                container.insertBefore(stagedAcc, changesAcc);
+            }
+        }
+
         if (tab && tab.activeFile && (tab.activeCommitHash === 'STAGED' || tab.activeCommitHash === 'UNSTAGED')) {
             const isStaged = tab.activeCommitHash === 'STAGED';
             const listId = isStaged ? 'staged-files-list' : 'unstaged-files-list';
