@@ -673,23 +673,10 @@ function drawCommitGraph(commits, canvasId) {
     const rows = document.querySelectorAll('.commit-row');
     if (rows.length === 0) return;
 
-    const baseContentHeight = rows[0].querySelector('.commit-content').offsetHeight || 24;
+    let maxOverallWidth = 60;
     const paddingOffset = 2; // Approximate padding top
     
-    const lastRow = rows[rows.length - 1];
-    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight;
-    const width = 60;
-    
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = totalHeight * dpr;
-    canvas.style.width = width + 'px';
-    canvas.style.height = totalHeight + 'px';
-
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, width, totalHeight);
-
     const tracks = [];
     const commitCoords = {};
     const colors = ['#bb86fc', '#03dac6', '#cf6679', '#ffb74d', '#64b5f6', '#81c784'];
@@ -707,11 +694,17 @@ function drawCommitGraph(commits, canvasId) {
             }
         }
 
-        const x = 20 + (trackIndex * 10);
-        const y = rows[i].offsetTop + (baseContentHeight / 2) + paddingOffset;
+        // Free up any other tracks that were pointing to this commit (merged branches)
+        for (let j = 0; j < tracks.length; j++) {
+            if (j !== trackIndex && tracks[j] === commit.hash) {
+                tracks[j] = null;
+            }
+        }
+
+        const x = Math.round(15 + (trackIndex * 15)) + 0.5;
         const color = colors[trackIndex % colors.length];
         
-        commitCoords[commit.hash] = { x, y, color };
+        commitCoords[commit.hash] = { x, y: 0, color };
 
         if (commit.parents && commit.parents.length > 0) {
             tracks[trackIndex] = commit.parents[0];
@@ -727,6 +720,35 @@ function drawCommitGraph(commits, canvasId) {
         } else {
             tracks[trackIndex] = null;
         }
+
+        let maxActiveIndex = trackIndex;
+        for (let j = 0; j < tracks.length; j++) {
+            if (tracks[j]) maxActiveIndex = Math.max(maxActiveIndex, j);
+        }
+        
+        const requiredPadding = 30 + (maxActiveIndex * 15);
+        rows[i].style.paddingLeft = requiredPadding + 'px';
+        maxOverallWidth = Math.max(maxOverallWidth, requiredPadding + 10);
+    });
+
+    const baseContentHeight = rows[0].querySelector('.commit-content').offsetHeight || 24;
+    const lastRow = rows[rows.length - 1];
+    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight;
+    
+    canvas.width = Math.floor(maxOverallWidth * dpr);
+    canvas.height = Math.floor(totalHeight * dpr);
+    canvas.style.width = maxOverallWidth + 'px';
+    canvas.style.height = totalHeight + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, maxOverallWidth, totalHeight);
+    
+    commits.forEach((commit, i) => {
+        const coord = commitCoords[commit.hash];
+        if (coord) {
+            coord.y = Math.round(rows[i].offsetTop + (baseContentHeight / 2) + paddingOffset) + 0.5;
+        }
     });
 
     ctx.lineWidth = 2;
@@ -739,12 +761,24 @@ function drawCommitGraph(commits, canvasId) {
             if (end) {
                 ctx.beginPath();
                 ctx.moveTo(start.x, start.y);
-                ctx.bezierCurveTo(
-                    start.x, start.y + (baseContentHeight / 2),
-                    end.x, end.y - (baseContentHeight / 2),
-                    end.x, end.y
-                );
+                
+                if (start.x === end.x) {
+                    ctx.lineTo(end.x, end.y);
+                } else {
+                    const shiftY = Math.min(baseContentHeight, Math.abs(end.y - start.y));
+                    const dir = end.y > start.y ? 1 : -1;
+                    
+                    ctx.bezierCurveTo(
+                        start.x, start.y + (shiftY * 0.2 * dir),
+                        end.x, start.y + (shiftY * 0.8 * dir),
+                        end.x, start.y + (shiftY * dir)
+                    );
+                    ctx.lineTo(end.x, end.y);
+                }
+                
                 ctx.strokeStyle = idx === 0 ? start.color : end.color;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
                 ctx.stroke();
             }
         });
@@ -758,9 +792,7 @@ function drawCommitGraph(commits, canvasId) {
         ctx.arc(coord.x, coord.y, 4, 0, 2 * Math.PI);
         ctx.fillStyle = coord.color;
         ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#1e1e1e';
-        ctx.stroke();
+        // Removed the dark stroke to prevent cutout artifacts
     });
 }
 
