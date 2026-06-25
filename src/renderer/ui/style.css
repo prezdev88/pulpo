@@ -717,23 +717,24 @@ main {
 
 .commit-row {
     position: relative;
-    padding: 0.5rem 0 0.5rem 60px;
+    padding: 0.15rem 0 0.15rem 50px;
     cursor: pointer;
     transition: background 0.15s;
-    border-radius: 4px;
-    min-height: 48px; /* To ensure uniform spacing */
+    display: block;
 }
 
 .commit-row:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
-
-
 .commit-content {
     display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    width: 100%;
+    min-height: 24px;
 }
 
 .commit-message {
@@ -743,23 +744,15 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.commit-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
+    flex-shrink: 1;
 }
 
 .commit-author {
-    color: var(--accent-color);
-    font-weight: 500;
-}
-
-.commit-date {
-    color: #666;
-    font-size: 0.7rem;
-    margin-top: 0.1rem;
+    color: #888;
+    font-size: 0.75rem;
+    font-weight: normal;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Custom Commit File Rows */

@@ -631,8 +631,11 @@ function drawCommitGraph(commits, canvasId) {
     const rows = document.querySelectorAll('.commit-row');
     if (rows.length === 0) return;
 
-    const rowHeight = rows[0].offsetHeight || 48;
-    const totalHeight = rows[rows.length - 1].offsetTop + rowHeight;
+    const baseContentHeight = rows[0].querySelector('.commit-content').offsetHeight || 24;
+    const paddingOffset = 2; // Approximate padding top
+    
+    const lastRow = rows[rows.length - 1];
+    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight;
     const width = 60;
     
     const dpr = window.devicePixelRatio || 1;
@@ -663,7 +666,7 @@ function drawCommitGraph(commits, canvasId) {
         }
 
         const x = 20 + (trackIndex * 10);
-        const y = rows[i].offsetTop + (rowHeight / 2);
+        const y = rows[i].offsetTop + (baseContentHeight / 2) + paddingOffset;
         const color = colors[trackIndex % colors.length];
         
         commitCoords[commit.hash] = { x, y, color };
@@ -695,8 +698,8 @@ function drawCommitGraph(commits, canvasId) {
                 ctx.beginPath();
                 ctx.moveTo(start.x, start.y);
                 ctx.bezierCurveTo(
-                    start.x, start.y + rowHeight / 2,
-                    end.x, end.y - rowHeight / 2,
+                    start.x, start.y + (baseContentHeight / 2),
+                    end.x, end.y - (baseContentHeight / 2),
                     end.x, end.y
                 );
                 ctx.strokeStyle = idx === 0 ? start.color : end.color;

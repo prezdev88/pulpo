@@ -120,12 +120,10 @@
     <template id="commit-template">
         <li class="commit-row">
             <div class="commit-content">
-                <div class="commit-message" data-field="message"></div>
-                <div class="commit-meta">
-                    <span class="commit-hash" data-field="hash"></span>
-                    <span class="commit-author" data-field="author"></span>
-                </div>
-                <div class="commit-date" data-field="date"></div>
+                <span class="commit-message" data-field="message"></span>
+                <span class="commit-author" data-field="author"></span>
+                <span style="display: none;" data-field="hash"></span>
+                <span style="display: none;" data-field="date"></span>
             </div>
         </li>
     </template>
