@@ -373,6 +373,10 @@ async function loadHistoryData(repoPath) {
 async function loadStagingData(repoPath) {
     try {
         const status = await window.api.getStatus(repoPath);
+        
+        document.getElementById('staged-count').textContent = status.staged.length;
+        document.getElementById('changes-count').textContent = status.unstaged.length;
+
         renderStagingFiles(status.staged, 'staged-files-list', true, repoPath);
         renderStagingFiles(status.unstaged, 'unstaged-files-list', false, repoPath);
 
@@ -394,8 +398,8 @@ async function loadStagingData(repoPath) {
         if (tab && tab.activeFile && (tab.activeCommitHash === 'STAGED' || tab.activeCommitHash === 'UNSTAGED')) {
             const isStaged = tab.activeCommitHash === 'STAGED';
             const listId = isStaged ? 'staged-files-list' : 'unstaged-files-list';
-            const container = document.getElementById(listId);
-            const fileRow = Array.from(container.querySelectorAll('li')).find(r => r.querySelector('.file-name').textContent === tab.activeFile);
+            const listContainer = document.getElementById(listId);
+            const fileRow = Array.from(listContainer.querySelectorAll('li')).find(r => r.querySelector('.file-name').textContent === tab.activeFile.split('/').pop());
             if (fileRow) {
                 fileRow.classList.add('selected');
                 await renderLiveDiff(repoPath, tab.activeFile, isStaged);
@@ -421,8 +425,29 @@ function renderStagingFiles(files, containerId, isStaged, repoPath) {
         const clone = template.content.cloneNode(true);
         const li = clone.querySelector('li');
         
-        clone.querySelector('.file-status').textContent = f.status;
-        clone.querySelector('.file-name').textContent = f.file;
+        const pathParts = f.file.split('/');
+        const basename = pathParts.pop();
+        const directory = pathParts.length > 0 ? pathParts.join('/') : '';
+        
+        let iconHtml = '<i class="fa-solid fa-file" style="color: #ccc;"></i>';
+        if (basename.endsWith('.md')) iconHtml = '<i class="fa-solid fa-file-lines" style="color: #69b4d9;"></i>';
+        else if (basename.endsWith('.js') || basename.endsWith('.ts')) iconHtml = '<i class="fa-brands fa-js" style="color: #f1e05a;"></i>';
+        else if (basename.endsWith('.json')) iconHtml = '<i class="fa-solid fa-file-code" style="color: #854CC7;"></i>';
+        else if (basename.endsWith('.css') || basename.endsWith('.html')) iconHtml = '<i class="fa-brands fa-html5" style="color: #e34c26;"></i>';
+
+        clone.querySelector('.file-icon').innerHTML = iconHtml;
+        clone.querySelector('.file-name').textContent = basename;
+        clone.querySelector('.file-directory').textContent = directory;
+        
+        const statusSpan = clone.querySelector('.file-status');
+        let shortStatus = f.status.charAt(0).toUpperCase();
+        if (f.status.includes('?')) shortStatus = 'U';
+        statusSpan.textContent = shortStatus;
+        
+        if (shortStatus === 'M') statusSpan.style.color = '#e2c08d';
+        else if (shortStatus === 'A' || shortStatus === 'U') statusSpan.style.color = '#73c991';
+        else if (shortStatus === 'D') statusSpan.style.color = '#f14c4c';
+        else statusSpan.style.color = '#888';
         
         const btn = clone.querySelector('.stage-toggle-btn');
         btn.innerHTML = isStaged ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-plus"></i>';
@@ -445,6 +470,7 @@ function renderStagingFiles(files, containerId, isStaged, repoPath) {
         li.addEventListener('click', async () => {
             document.querySelectorAll('.staging-file-row').forEach(row => row.classList.remove('selected'));
             li.classList.add('selected');
+            tabState.tabs.find(t => t.id === tabState.activeTabId).activeFile = f.file;
             await renderLiveDiff(repoPath, f.file, isStaged);
         });
 

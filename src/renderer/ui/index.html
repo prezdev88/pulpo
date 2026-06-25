@@ -48,9 +48,12 @@
                         <div class="staging-accordion" id="changes-accordion">
                             <h4 class="accordion-header">
                                 <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Changes</span>
-                                <span class="accordion-actions">
-                                    <button id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></button>
-                                </span>
+                                <div class="accordion-right">
+                                    <span class="count-badge" id="changes-count">0</span>
+                                    <span class="accordion-actions">
+                                        <button id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></button>
+                                    </span>
+                                </div>
                             </h4>
                             <div class="accordion-content">
                                 <ul id="unstaged-files-list" class="file-list"></ul>
@@ -60,9 +63,12 @@
                         <div class="staging-accordion" id="staged-accordion">
                             <h4 class="accordion-header">
                                 <span class="accordion-title"><i class="fa-solid fa-chevron-down accordion-icon"></i> Staged Changes</span>
-                                <span class="accordion-actions">
-                                    <button id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></button>
-                                </span>
+                                <div class="accordion-right">
+                                    <span class="count-badge" id="staged-count">0</span>
+                                    <span class="accordion-actions">
+                                        <button id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></button>
+                                    </span>
+                                </div>
                             </h4>
                             <div class="accordion-content">
                                 <ul id="staged-files-list" class="file-list"></ul>
@@ -127,11 +133,15 @@
     <!-- Template for Source Control Files -->
     <template id="staging-file-template">
         <li class="staging-file-row">
-            <span class="file-status"></span>
-            <span class="file-name"></span>
+            <span class="file-icon" style="margin-right: 8px; width: 16px; text-align: center;"></span>
+            <div class="file-info" style="display: flex; align-items: baseline; flex: 1; overflow: hidden;">
+                <span class="file-name" style="color: #e8e8e8; margin-right: 6px; white-space: nowrap;"></span>
+                <span class="file-directory" style="color: #666; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+            </div>
             <div class="file-actions">
                 <button class="stage-toggle-btn icon-btn"></button>
             </div>
+            <span class="file-status" style="margin-left: 8px; font-weight: 600; font-size: 0.8rem;"></span>
         </li>
     </template>
 
