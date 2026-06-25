@@ -145,11 +145,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isHResizing) return;
             const sidebar = document.querySelector('.commits-sidebar');
             const sidebarRect = sidebar.getBoundingClientRect();
-            const newHeight = sidebarRect.bottom - e.clientY;
+            let newHeight = sidebarRect.bottom - e.clientY;
             
-            if (newHeight >= 100 && newHeight <= sidebarRect.height * 0.8) {
-                commitsPanel.style.height = `${newHeight}px`;
-            }
+            const minHeight = 100;
+            // Reservar al menos 220px para el repo header, textarea de commit y titulos de staging
+            const maxHeight = Math.max(minHeight, sidebarRect.height - 220);
+            
+            if (newHeight < minHeight) newHeight = minHeight;
+            if (newHeight > maxHeight) newHeight = maxHeight;
+            
+            commitsPanel.style.height = `${newHeight}px`;
         });
         
         document.addEventListener('mouseup', () => {

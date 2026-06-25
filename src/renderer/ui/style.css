@@ -553,6 +553,7 @@ main {
     min-height: 0;
     width: 100%;
     container-type: inline-size;
+    overflow-y: auto;
 }
 
 .commit-box {
