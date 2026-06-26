@@ -400,6 +400,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, { capture: true, passive: false });
     }
+
+    if (window.api && window.api.onRepoChanged) {
+        window.api.onRepoChanged((repoPath) => {
+            if (activeRepoPath === repoPath) {
+                console.log('Real-time file change detected in', repoPath);
+                loadStagingData(repoPath);
+                // We only reload staging data automatically to avoid resetting user selection in history,
+                // but we could also load history if we want.
+                // loadHistoryData(repoPath); 
+            }
+        });
+    }
 });
 
 // Funciones de Pestañas
@@ -473,6 +485,10 @@ function switchTab(id) {
     // RNF03: Re-render when switching
     loadStagingData(tab.path);
     loadHistoryData(tab.path);
+
+    if (window.api && window.api.watchRepo) {
+        window.api.watchRepo(tab.path);
+    }
 }
 
 async function loadHistoryData(repoPath) {
@@ -703,10 +719,15 @@ async function renderLiveDiff(repoPath, file, isStaged) {
 }
 
 function closeTab(id) {
-    const index = tabState.tabs.findIndex(t => t.id === id);
-    if (index === -1) return;
+    const tabIndex = tabState.tabs.findIndex(t => t.id === id);
+    if (tabIndex === -1) return;
     
-    tabState.tabs.splice(index, 1);
+    const tab = tabState.tabs[tabIndex];
+    if (window.api && window.api.unwatchRepo) {
+        window.api.unwatchRepo(tab.path);
+    }
+
+    tabState.tabs.splice(tabIndex, 1);
     
     if (tabState.tabs.length === 0) {
         tabState.activeTabId = null;

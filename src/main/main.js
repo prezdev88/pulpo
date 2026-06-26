@@ -20,6 +20,15 @@ const { pushUseCase } = require('../core/pushUseCase');
 const { getRemoteUrl } = require('../core/getRemoteUrlUseCase');
 const gitExec = require('../core/gitExec');
 
+let chokidar;
+try {
+  chokidar = require('chokidar');
+} catch (e) {
+  console.warn("Chokidar is not installed. File watching will be disabled.");
+}
+
+const activeWatchers = new Map();
+
 let logWindow = null;
 
 function openLogWindow() {
@@ -168,6 +177,42 @@ app.whenReady().then(() => {
 
   ipcMain.handle('app:openExternal', async (event, url) => {
     return await shell.openExternal(url);
+  });
+
+  ipcMain.on('app:watchRepo', (event, repoPath) => {
+    if (!chokidar) return;
+    if (activeWatchers.has(repoPath)) return;
+    
+    const watcher = chokidar.watch(repoPath, {
+      ignored: [
+        '**/node_modules/**',
+        '**/.git/objects/**',
+        '**/.git/hooks/**',
+        '**/.git/logs/**'
+      ],
+      persistent: true,
+      ignoreInitial: true
+    });
+
+    let timeout;
+    watcher.on('all', (eventName, filePath) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        BrowserWindow.getAllWindows().forEach(win => {
+          win.webContents.send('repo:changed', repoPath);
+        });
+      }, 300);
+    });
+
+    activeWatchers.set(repoPath, watcher);
+  });
+
+  ipcMain.on('app:unwatchRepo', (event, repoPath) => {
+    const watcher = activeWatchers.get(repoPath);
+    if (watcher) {
+      watcher.close();
+      activeWatchers.delete(repoPath);
+    }
   });
 
   createWindow();

@@ -21,5 +21,8 @@ contextBridge.exposeInMainWorld('api', {
   pushRepository: (repoPath) => ipcRenderer.invoke('git:push', repoPath),
   getRemoteUrl: (repoPath) => ipcRenderer.invoke('git:getRemoteUrl', repoPath),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
-  onOpenRepo: (callback) => ipcRenderer.on('app:openRepo', (_event, value) => callback(value))
+  onOpenRepo: (callback) => ipcRenderer.on('app:openRepo', (_event, value) => callback(value)),
+  watchRepo: (repoPath) => ipcRenderer.send('app:watchRepo', repoPath),
+  unwatchRepo: (repoPath) => ipcRenderer.send('app:unwatchRepo', repoPath),
+  onRepoChanged: (callback) => ipcRenderer.on('repo:changed', (_event, value) => callback(value))
 });
