@@ -331,8 +331,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('commit-execute-btn').addEventListener('click', async () => {
+    const executeBtn = document.getElementById('commit-execute-btn');
+    executeBtn.addEventListener('click', async () => {
         if (!activeRepoPath) return;
+        const action = executeBtn.getAttribute('data-action');
+        
+        if (action === 'push') {
+            try {
+                showToast('Pushing to remote...', 'info');
+                await window.api.push(activeRepoPath);
+                showToast('Push successful!', 'success');
+            } catch(e) {
+                alert(e.message);
+            }
+            return;
+        }
+
+        // Action is 'commit'
         const msg = document.getElementById('commit-message-input').value.trim();
         if (!msg) { alert('Please enter a commit message.'); return; }
         try {
@@ -533,16 +548,32 @@ async function loadStagingData(repoPath) {
 
         const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
         
-        // Dynamically reorder accordions
         const container = document.getElementById('unified-view-container');
         const changesAcc = document.getElementById('changes-accordion');
         const stagedAcc = document.getElementById('staged-accordion');
+        const commitBtn = document.getElementById('commit-execute-btn');
         if (container && changesAcc && stagedAcc) {
             if (status.staged.length === 0) {
                 stagedAcc.classList.add('hidden');
+                if (commitBtn) {
+                    if (status.ahead > 0) {
+                        commitBtn.textContent = `Push (${status.ahead})`;
+                        commitBtn.setAttribute('data-action', 'push');
+                        commitBtn.disabled = false;
+                    } else {
+                        commitBtn.textContent = 'Commit';
+                        commitBtn.setAttribute('data-action', 'commit');
+                        commitBtn.disabled = true;
+                    }
+                }
             } else {
                 stagedAcc.classList.remove('hidden');
                 container.insertBefore(stagedAcc, changesAcc);
+                if (commitBtn) {
+                    commitBtn.textContent = 'Commit';
+                    commitBtn.setAttribute('data-action', 'commit');
+                    commitBtn.disabled = false;
+                }
             }
         }
 

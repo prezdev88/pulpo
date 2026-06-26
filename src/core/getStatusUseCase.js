@@ -3,13 +3,23 @@ const exec = util.promisify(require('child_process').exec);
 
 async function getStatus(repoPath) {
     try {
-        const { stdout } = await exec('git status --porcelain', { cwd: repoPath });
+        const { stdout } = await exec('git status --porcelain -b', { cwd: repoPath });
         const lines = stdout.split('\n').filter(line => line.trim() !== '');
         
         const staged = [];
         const unstaged = [];
+        let ahead = 0;
         
         lines.forEach(line => {
+            if (line.startsWith('##')) {
+                if (line.includes('ahead ')) {
+                    const match = line.match(/ahead (\d+)/);
+                    if (match) ahead = parseInt(match[1]);
+                } else if (!line.includes('...') && !line.includes('no branch')) {
+                    ahead = 1; // Publish new branch
+                }
+                return;
+            }
             // Status is the first two characters.
             // X is the index status (staged), Y is the working tree status (unstaged)
             const x = line[0];
@@ -27,7 +37,7 @@ async function getStatus(repoPath) {
             }
         });
         
-        return { staged, unstaged };
+        return { staged, unstaged, ahead };
     } catch (error) {
         throw new Error(`Failed to get git status: ${error.message}`);
     }
