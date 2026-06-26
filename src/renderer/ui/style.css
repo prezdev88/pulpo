@@ -1,9 +1,9 @@
 /* Premium Dark Theme */
 :root {
-    --bg-color: #121212;
-    --text-color: #e0e0e0;
-    --accent-color: #bb86fc;
-    --surface-color: #1e1e1e;
+    --bg-color: #1e1e1e;
+    --text-color: #cccccc;
+    --accent-color: #007acc;
+    --surface-color: #252526;
 }
 
 body {
@@ -795,13 +795,13 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--surface-color);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 0.4rem 1rem;
-    font-size: 0.85rem;
-    color: #a0a0a0;
-    height: 28px;
+    background: var(--vscode-statusBar-background, #007acc);
+    color: var(--vscode-statusBar-foreground, #ffffff);
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    height: 22px; /* VS Code standard height */
     user-select: none;
+    z-index: 1000;
 }
 
 .status-bar i {
@@ -809,19 +809,18 @@ main {
 }
 
 .remote-link {
-    color: #60a5fa;
+    color: var(--vscode-statusBar-foreground, #ffffff);
     text-decoration: none;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: opacity 0.2s;
 }
 
 .remote-link:hover {
-    color: #93c5fd;
-    text-decoration: underline;
+    opacity: 0.8;
 }
 
 .remote-link.disabled {
-    color: #888;
+    opacity: 0.5;
     pointer-events: none;
     text-decoration: none;
 }
