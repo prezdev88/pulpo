@@ -436,7 +436,7 @@ main {
 .commits-table-container {
     flex: 1;
     overflow-y: auto;
-    margin: 1rem 0;
+    margin: 0;
 }
 
 /* Sidebar Toggle Bar & Staging Styles */
