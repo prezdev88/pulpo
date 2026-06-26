@@ -335,13 +335,20 @@ document.addEventListener('DOMContentLoaded', () => {
     executeBtn.addEventListener('click', async () => {
         if (!activeRepoPath) return;
         const action = executeBtn.getAttribute('data-action');
+        const originalText = executeBtn.textContent;
         
         if (action === 'push') {
             try {
+                executeBtn.disabled = true;
+                executeBtn.textContent = 'Pushing...';
                 showToast('Pushing to remote...', 'info');
                 await window.api.pushRepository(activeRepoPath);
                 showToast('Push successful!', 'success');
+                loadStagingData(activeRepoPath);
+                loadHistoryData(activeRepoPath);
             } catch(e) {
+                executeBtn.disabled = false;
+                executeBtn.textContent = originalText;
                 alert(e.message);
             }
             return;
@@ -351,6 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const msg = document.getElementById('commit-message-input').value.trim();
         if (!msg) { alert('Please enter a commit message.'); return; }
         try {
+            executeBtn.disabled = true;
+            executeBtn.textContent = 'Committing...';
             await window.api.commitChanges(activeRepoPath, msg);
             document.getElementById('commit-message-input').value = '';
             const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
@@ -358,7 +367,11 @@ document.addEventListener('DOMContentLoaded', () => {
             saveTabsState();
             loadStagingData(activeRepoPath);
             loadHistoryData(activeRepoPath);
-        } catch(e) { alert(e.message); }
+        } catch(e) { 
+            executeBtn.disabled = false;
+            executeBtn.textContent = originalText;
+            alert(e.message); 
+        }
     });
 
     restoreTabsState();
