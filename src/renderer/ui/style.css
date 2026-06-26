@@ -356,26 +356,28 @@ main {
 
 .resizer {
     width: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
     cursor: col-resize;
     z-index: 100;
-    transition: background 0.2s;
+    transition: background 0.1s 0.2s; /* Slight delay before highlight */
 }
 
 .resizer:hover, .resizer.resizing {
-    background: var(--accent-color);
+    background: var(--vscode-focusBorder, var(--accent-color));
 }
 
 .horizontal-resizer {
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
     cursor: row-resize;
     z-index: 100;
-    transition: background 0.2s;
+    transition: background 0.1s 0.2s;
 }
 
 .horizontal-resizer:hover, .horizontal-resizer.resizing {
-    background: var(--accent-color);
+    background: var(--vscode-focusBorder, var(--accent-color));
 }
 
 .commit-details-pane {
@@ -507,12 +509,13 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.3rem 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    font-size: 0.75rem;
+    padding: 0.15rem 1rem;
+    background: transparent;
+    font-size: 0.65rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #888;
+    color: var(--vscode-foreground, #cccccc);
     margin: 0;
     position: sticky;
     top: 0;

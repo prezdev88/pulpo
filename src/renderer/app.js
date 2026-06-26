@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (header.parentElement.id === 'commits-panel') {
                 if (header.classList.contains('collapsed')) {
                     header.parentElement.dataset.prevHeight = header.parentElement.style.height;
-                    header.parentElement.style.height = '24px';
+                    header.parentElement.style.height = 'fit-content';
                     header.parentElement.classList.add('collapsed-panel');
                 } else {
                     header.parentElement.style.height = header.parentElement.dataset.prevHeight || '300px';
