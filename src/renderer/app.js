@@ -406,9 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeRepoPath === repoPath) {
                 console.log('Real-time file change detected in', repoPath);
                 loadStagingData(repoPath);
-                // We only reload staging data automatically to avoid resetting user selection in history,
-                // but we could also load history if we want.
-                // loadHistoryData(repoPath); 
+                loadHistoryData(repoPath); 
             }
         });
     }
