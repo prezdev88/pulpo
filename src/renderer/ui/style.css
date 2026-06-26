@@ -559,11 +559,30 @@ main {
 }
 
 .accordion-content {
-    display: block;
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.2s ease-out;
 }
 
 .accordion-content.collapsed {
+    grid-template-rows: 0fr;
+}
+
+.accordion-content > * {
+    min-height: 0;
+}
+
+#commits-panel > .accordion-content {
+    display: block; /* Restore block for canvas overlay */
+}
+
+#commits-panel > .accordion-content.collapsed {
     display: none;
+}
+
+#commits-panel {
+    transition: height 0.2s ease-out;
+    overflow: hidden;
 }
 
 .file-list {

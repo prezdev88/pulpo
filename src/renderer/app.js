@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (commitsPanel.classList.contains('collapsed-panel')) return;
             isHResizing = true;
             hResizer.classList.add('resizing');
+            commitsPanel.style.transition = 'none'; // Prevent lag during resize
             document.body.style.cursor = 'row-resize';
             e.preventDefault();
         });
@@ -194,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isHResizing) {
                 isHResizing = false;
                 hResizer.classList.remove('resizing');
+                commitsPanel.style.transition = ''; // Restore transition
                 document.body.style.cursor = '';
             }
         });
@@ -294,8 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (header.parentElement.id === 'commits-panel') {
                 if (header.classList.contains('collapsed')) {
-                    header.parentElement.dataset.prevHeight = header.parentElement.style.height;
-                    header.parentElement.style.height = 'fit-content';
+                    header.parentElement.dataset.prevHeight = header.parentElement.getBoundingClientRect().height + 'px';
+                    header.parentElement.style.height = header.getBoundingClientRect().height + 'px';
                     header.parentElement.classList.add('collapsed-panel');
                 } else {
                     header.parentElement.style.height = header.parentElement.dataset.prevHeight || '300px';
