@@ -6,6 +6,16 @@
     <title>Pulpo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script type="module" src="../../../node_modules/@vscode/webview-ui-toolkit/dist/toolkit.min.js"></script>
+    <script>
+        var require = { paths: { 'vs': '../../../node_modules/monaco-editor/min/vs' } };
+    </script>
+    <script src="../../../node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script>
+        require(['vs/editor/editor.main'], function() {
+            console.log('Monaco Editor loaded successfully');
+        });
+    </script>
 </head>
 <body>
     <div id="app-container">
@@ -13,7 +23,7 @@
             <!-- Vista 1: Landing -->
             <div class="landing-card" id="landing-card">
                 <img src="../../assets/logo.png" alt="Pulpo Logo" style="width: 380px; height: auto; margin-bottom: 1.5rem; border-radius: 10px; display: block; margin-left: auto; margin-right: auto;">
-                <button id="open-repo-btn" class="primary-btn">Open Local Repository</button>
+                <vscode-button id="open-repo-btn" class="primary-btn">Open Local Repository</vscode-button>
                 <div id="repo-path-display" class="hidden path-text"></div>
             </div>
 
@@ -22,7 +32,7 @@
                 <div id="tabs-container" class="tabs-container">
                     <!-- Tabs go here -->
                 </div>
-                <button id="add-tab-btn" class="add-tab-btn" title="Open Repository"><i class="fa-solid fa-plus"></i></button>
+                <vscode-button appearance="icon" id="add-tab-btn" class="add-tab-btn" title="Open Repository"><i class="fa-solid fa-plus"></i></vscode-button>
             </nav>
 
             <!-- Vista 2: Historial de Commits -->
@@ -31,21 +41,20 @@
                     <!-- Unified View -->
                     <div id="unified-view-container" class="sidebar-view">
                         <header class="repo-header">
-                            <h2 id="active-repo-name">Repository</h2>
                             <div class="repo-actions">
-                                <button id="fetch-btn" class="glass-btn" title="Fetch"><i class="fa-solid fa-download"></i></button>
-                                <button id="pull-btn" class="glass-btn" title="Pull"><i class="fa-solid fa-arrow-down"></i></button>
-                                <button id="push-btn" class="glass-btn" title="Push"><i class="fa-solid fa-arrow-up"></i></button>
-                                <select id="branch-selector" class="glass-select"></select>
-                                <button id="new-branch-btn" class="glass-btn" title="Create New Branch"><i class="fa-solid fa-plus"></i></button>
+                                <vscode-button appearance="icon" id="fetch-btn" class="glass-btn" title="Fetch"><i class="fa-solid fa-download"></i></vscode-button>
+                                <vscode-button appearance="icon" id="pull-btn" class="glass-btn" title="Pull"><i class="fa-solid fa-arrow-down"></i></vscode-button>
+                                <vscode-button appearance="icon" id="push-btn" class="glass-btn" title="Push"><i class="fa-solid fa-arrow-up"></i></vscode-button>
+                                <vscode-dropdown id="branch-selector" class="glass-select"></vscode-dropdown>
+                                <vscode-button appearance="icon" id="new-branch-btn" class="glass-btn" title="Create New Branch"><i class="fa-solid fa-plus"></i></vscode-button>
 
                             </div>
                         </header>
 
                         <!-- Staging View (Merged) -->
                         <div class="commit-box">
-                            <textarea id="commit-message-input" class="commit-textarea" placeholder="Message (Cmd+Enter to commit)"></textarea>
-                            <button id="commit-execute-btn" class="primary-btn commit-submit-btn">Commit</button>
+                            <vscode-text-area id="commit-message-input" class="commit-textarea" placeholder="Message (Cmd+Enter to commit)" resize="vertical"></vscode-text-area>
+                            <vscode-button id="commit-execute-btn" class="primary-btn commit-submit-btn">Commit</vscode-button>
                         </div>
                         
                         <div class="staging-accordion" id="changes-accordion">
@@ -54,7 +63,7 @@
                                 <div class="accordion-right">
                                     <span class="count-badge" id="changes-count">0</span>
                                     <span class="accordion-actions">
-                                        <button id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></button>
+                                        <vscode-button appearance="icon" id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></vscode-button>
                                     </span>
                                 </div>
                             </h4>
@@ -69,7 +78,7 @@
                                 <div class="accordion-right">
                                     <span class="count-badge" id="staged-count">0</span>
                                     <span class="accordion-actions">
-                                        <button id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></button>
+                                        <vscode-button appearance="icon" id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></vscode-button>
                                     </span>
                                 </div>
                             </h4>
@@ -95,8 +104,8 @@
                 <div class="resizer" id="sidebar-resizer"></div>
                 <section class="commit-details-pane">
 
-                    <div id="commit-details-content" class="hidden">
-                        <div class="commit-header">
+                    <div id="commit-details-content" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+                        <div class="commit-header" style="flex-shrink: 0;">
                             <h3 id="detail-message"></h3>
                             <div class="commit-meta-row">
                                 <span class="badge" id="detail-hash"></span>
@@ -104,11 +113,11 @@
                                 <span id="detail-date" class="text-muted"></span>
                             </div>
                         </div>
-                        <div class="diff-layout">
-                            <div class="diff-file-list" id="diff-file-list">
+                        <div class="diff-layout" style="flex: 1; min-height: 0;">
+                            <div class="diff-file-list" id="diff-file-list" style="flex-shrink: 0;">
                                 <!-- Changed files will be listed here -->
                             </div>
-                            <div class="diff-viewer" id="diff-viewer">
+                            <div class="diff-viewer" id="diff-viewer" style="flex: 1; min-height: 0; position: relative;">
                                 <div class="diff-placeholder">Select a file to view its diff</div>
                             </div>
                         </div>
@@ -152,7 +161,7 @@
                 <span class="file-directory" style="color: #666; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
             </div>
             <div class="file-actions">
-                <button class="stage-toggle-btn icon-btn"></button>
+                <vscode-button appearance="icon" class="stage-toggle-btn icon-btn"></vscode-button>
             </div>
             <span class="file-status" style="margin-left: 8px; font-weight: 600; font-size: 0.8rem;"></span>
         </li>
@@ -162,10 +171,10 @@
     <div id="branch-modal" class="modal hidden">
         <div class="modal-content" style="width: 400px;">
             <h3>Create New Branch</h3>
-            <input type="text" id="branch-name-input" class="glass-select" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem;" placeholder="Branch name...">
+            <vscode-text-field id="branch-name-input" class="glass-select" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem;" placeholder="Branch name..."></vscode-text-field>
             <div style="text-align: right;">
-                <button id="cancel-branch-btn" class="glass-btn" style="margin-right: 0.5rem;">Cancel</button>
-                <button id="confirm-branch-btn" class="primary-btn">Create</button>
+                <vscode-button id="cancel-branch-btn" appearance="secondary" class="glass-btn" style="margin-right: 0.5rem;">Cancel</vscode-button>
+                <vscode-button id="confirm-branch-btn" class="primary-btn">Create</vscode-button>
             </div>
         </div>
     </div>

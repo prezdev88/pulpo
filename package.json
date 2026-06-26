@@ -11,6 +11,10 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "monaco-editor": "^0.45.0"
+  },
   "devDependencies": {
     "electron": "^42.4.1",
     "jest": "^30.4.2"

@@ -13,7 +13,7 @@ let tabState = {
     activeTabId: null
 };
 let activeRepoPath = null;
-
+let monacoEditorInstance = null;
 // Toast Function
 function showToast(message, type = 'info') {
     let container = document.getElementById('toast-container');
@@ -423,7 +423,7 @@ function switchTab(id) {
     
     tabState.activeTabId = id;
     activeRepoPath = tab.path;
-    document.getElementById('active-repo-name').textContent = tab.name;
+    // Repository name heading was removed
     
     landingView.classList.add('hidden');
     tabsBar.classList.remove('hidden');
@@ -640,8 +640,7 @@ async function renderLiveDiff(repoPath, file, isStaged) {
 
     const diffViewerEl = document.getElementById('diff-viewer');
     document.getElementById('diff-file-list').innerHTML = `<div class="file-item" style="background:rgba(255,255,255,0.2)">${file}</div>`;
-    diffViewerEl.innerHTML = '<div class="diff-placeholder">Loading diff...</div>';
-
+    
     const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
     if (tab) {
         tab.activeCommitHash = isStaged ? 'STAGED' : 'UNSTAGED';
@@ -650,31 +649,10 @@ async function renderLiveDiff(repoPath, file, isStaged) {
     }
 
     try {
-        const diffText = await window.api.getLiveDiff(repoPath, file, isStaged);
-        diffViewerEl.innerHTML = '';
-        
-        if (!diffText) {
-            diffViewerEl.innerHTML = '<div style="padding:1rem;">No visible diff (maybe binary or empty).</div>';
-            return;
-        }
-
-        const lines = diffText.split('\n');
-        lines.forEach(line => {
-            const span = document.createElement('span');
-            if (line.startsWith('+') && !line.startsWith('+++')) {
-                span.className = 'diff-line-add';
-            } else if (line.startsWith('-') && !line.startsWith('---')) {
-                span.className = 'diff-line-del';
-            } else if (line.startsWith('@@')) {
-                span.className = 'diff-line-info';
-            } else {
-                span.className = 'diff-line-normal';
-            }
-            span.textContent = line + '\n';
-            diffViewerEl.appendChild(span);
-        });
+        const diffData = await window.api.getLiveDiff(repoPath, file, isStaged);
+        renderMonacoDiff(diffData);
     } catch (err) {
-        diffViewerEl.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;
+        clearDiffViewer(`<div style="color:red;">Error: ${err.message}</div>`);
     }
 }
 
@@ -915,8 +893,7 @@ async function loadCommitDetails(commit, repoPath, commitLi) {
     document.getElementById('detail-author').textContent = commit.author;
     document.getElementById('detail-date').textContent = commit.date;
 
-    const diffViewerEl = document.getElementById('diff-viewer');
-    diffViewerEl.innerHTML = '<div class="diff-placeholder">Select a file to view its diff</div>';
+    clearDiffViewer('<div class="diff-placeholder">Select a file to view its diff</div>');
 
     let inlineContainer = commitLi.querySelector('.commit-files-inline');
     if (!inlineContainer) {
@@ -972,65 +949,11 @@ async function loadCommitDetails(commit, repoPath, commitLi) {
 
 async function loadFileDiff(repoPath, hash, file) {
     const diffViewerEl = document.getElementById('diff-viewer');
-    diffViewerEl.innerHTML = '<div class="diff-placeholder">Loading diff...</div>';
-
+    
     try {
-        const diffText = await window.api.getFileDiff(repoPath, hash, file);
-        diffViewerEl.innerHTML = '';
+        const diffData = await window.api.getFileDiff(repoPath, hash, file);
         
-        let oldLineNum = 0;
-        let newLineNum = 0;
-
-        const lines = diffText.split('\n');
-        lines.forEach(line => {
-            if (line.startsWith('@@ ')) {
-                // Parse @@ -oldStart,oldCount +newStart,newCount @@
-                const match = line.match(/@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
-                if (match) {
-                    oldLineNum = parseInt(match[1], 10);
-                    newLineNum = parseInt(match[2], 10);
-                }
-                return; // skip rendering the @@ line itself
-            }
-
-            // Skip metadata lines to show only code
-            if (line.startsWith('diff --git') ||
-                line.startsWith('index ') ||
-                line.match(/^(new|deleted) file mode /) ||
-                line.startsWith('--- ') ||
-                line.startsWith('+++ ') ||
-                line.startsWith('\\ No newline')) {
-                return;
-            }
-
-            let oldNumStr = '';
-            let newNumStr = '';
-
-            const row = document.createElement('div');
-            if (line.startsWith('+')) {
-                row.className = 'diff-line-add';
-                newNumStr = newLineNum++;
-            } else if (line.startsWith('-')) {
-                row.className = 'diff-line-del';
-                oldNumStr = oldLineNum++;
-            } else {
-                row.className = 'diff-line-normal';
-                oldNumStr = oldLineNum++;
-                newNumStr = newLineNum++;
-            }
-
-            // Escape HTML tags in the code content
-            const safeContent = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-            row.innerHTML = `
-                <div class="diff-gutters">
-                    <span class="diff-line-num">${oldNumStr}</span>
-                    <span class="diff-line-num">${newNumStr}</span>
-                </div>
-                <span class="diff-line-content">${safeContent}</span>
-            `;
-            diffViewerEl.appendChild(row);
-        });
+        renderMonacoDiff(diffData);
 
         const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
         if (tab) {
@@ -1039,6 +962,57 @@ async function loadFileDiff(repoPath, hash, file) {
             saveTabsState();
         }
     } catch (err) {
-        diffViewerEl.innerHTML = `<div style="color:red;">Error: ${err.message}</div>`;
+        clearDiffViewer(`<div style="color:red;">Error: ${err.message}</div>`);
     }
 }
+
+function renderMonacoDiff(diffData) {
+    clearDiffViewer('');
+    
+    const container = document.getElementById('diff-viewer');
+    if (!window.monaco) {
+        container.innerHTML = '<div style="color:red; padding: 1rem;">Monaco Editor is not loaded.</div>';
+        return;
+    }
+
+    // Determine language from file extension
+    const ext = diffData.file.split('.').pop().toLowerCase();
+    let language = 'plaintext';
+    if (ext === 'js' || ext === 'jsx') language = 'javascript';
+    else if (ext === 'ts' || ext === 'tsx') language = 'typescript';
+    else if (ext === 'html' || ext === 'htm') language = 'html';
+    else if (ext === 'css') language = 'css';
+    else if (ext === 'json') language = 'json';
+    else if (ext === 'py') language = 'python';
+    else if (ext === 'md') language = 'markdown';
+    else if (ext === 'sh') language = 'shell';
+
+    const originalModel = window.monaco.editor.createModel(diffData.original || '', language);
+    const modifiedModel = window.monaco.editor.createModel(diffData.modified || '', language);
+
+    monacoEditorInstance = window.monaco.editor.createDiffEditor(container, {
+        theme: 'vs-dark',
+        automaticLayout: true,
+        readOnly: true,
+        minimap: { enabled: true },
+        scrollBeyondLastLine: false,
+        renderSideBySide: true // Standard VS Code side-by-side diff
+    });
+
+    monacoEditorInstance.setModel({
+        original: originalModel,
+        modified: modifiedModel
+    });
+}
+
+function clearDiffViewer(placeholderHtml) {
+    if (monacoEditorInstance) {
+        monacoEditorInstance.dispose();
+        monacoEditorInstance = null;
+    }
+    const diffViewerEl = document.getElementById('diff-viewer');
+    if (diffViewerEl) {
+        diffViewerEl.innerHTML = placeholderHtml || '';
+    }
+}
+

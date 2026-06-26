@@ -155,5 +155,8 @@ if ! electron_available; then
     esac
 fi
 
+# Install dependencies locally to get toolkit and monaco
+npm install
+
 # Start the Electron app
 npm start

@@ -1,14 +1,24 @@
-const { exec } = require('./gitExec');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
-function getFileDiff(repoPath, hash, file) {
-    return new Promise((resolve, reject) => {
-        exec(`git show --format="" ${hash} -- "${file}"`, { cwd: repoPath }, (error, stdout, stderr) => {
-            if (error) {
-                return reject(error);
-            }
-            resolve(stdout.trimStart());
-        });
-    });
+async function getFileDiff(repoPath, hash, file) {
+    try {
+        let modified = '';
+        try {
+            const { stdout } = await exec(`git show ${hash}:"${file}"`, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 });
+            modified = stdout;
+        } catch (e) { modified = ''; }
+
+        let original = '';
+        try {
+            const { stdout } = await exec(`git show ${hash}^:"${file}"`, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 });
+            original = stdout;
+        } catch (e) { original = ''; }
+
+        return { original, modified, file };
+    } catch (error) {
+        throw new Error(`Failed to get file contents: ${error.message}`);
+    }
 }
 
 module.exports = getFileDiff;
