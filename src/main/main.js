@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
 const path = require('path');
 const { selectRepository } = require('../core/selectRepositoryUseCase');
 const { getCommits } = require('../core/getCommitsUseCase');
@@ -14,6 +14,10 @@ const { stageFiles } = require('../core/stageFilesUseCase');
 const { unstageFiles } = require('../core/unstageFilesUseCase');
 const { commitChanges } = require('../core/commitChangesUseCase');
 const { getLiveDiff } = require('../core/getLiveDiffUseCase');
+const { fetchUseCase } = require('../core/fetchUseCase');
+const { pullUseCase } = require('../core/pullUseCase');
+const { pushUseCase } = require('../core/pushUseCase');
+const { getRemoteUrl } = require('../core/getRemoteUrlUseCase');
 const gitExec = require('../core/gitExec');
 
 let logWindow = null;
@@ -144,6 +148,26 @@ app.whenReady().then(() => {
 
   ipcMain.handle('git:getLiveDiff', async (event, repoPath, file, isStaged) => {
     return await getLiveDiff(repoPath, file, isStaged);
+  });
+
+  ipcMain.handle('git:fetch', async (event, repoPath) => {
+    return await fetchUseCase(repoPath);
+  });
+
+  ipcMain.handle('git:pull', async (event, repoPath) => {
+    return await pullUseCase(repoPath);
+  });
+
+  ipcMain.handle('git:push', async (event, repoPath) => {
+    return await pushUseCase(repoPath);
+  });
+
+  ipcMain.handle('git:getRemoteUrl', async (event, repoPath) => {
+    return await getRemoteUrl(repoPath);
+  });
+
+  ipcMain.handle('app:openExternal', async (event, url) => {
+    return await shell.openExternal(url);
   });
 
   createWindow();

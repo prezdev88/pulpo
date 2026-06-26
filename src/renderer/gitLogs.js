@@ -37,7 +37,7 @@ function createLogElement(entry) {
 function renderLogs(logs) {
     logContainer.innerHTML = '';
     if (logs.length === 0) {
-        logContainer.innerHTML = '<div style="color: #888; text-align: center; margin-top: 2rem;">No logs yet.</div>';
+        logContainer.innerHTML = '<div id="empty-logs-msg" style="color: #888; text-align: center; margin-top: 2rem;">No logs yet.</div>';
         return;
     }
     logs.forEach(log => {
@@ -52,9 +52,10 @@ ipcRenderer.invoke('git:getLogs').then(renderLogs);
 
 // Listen for real-time updates
 ipcRenderer.on('git:log', (event, logEntry) => {
-    // If it was empty, clear the "No logs yet" message
-    if (logContainer.querySelector('div[style]')) {
-        logContainer.innerHTML = '';
+    // If the empty message exists, remove it
+    const emptyMsg = document.getElementById('empty-logs-msg');
+    if (emptyMsg) {
+        emptyMsg.remove();
     }
     logContainer.appendChild(createLogElement(logEntry));
     logContainer.scrollTop = logContainer.scrollHeight;
@@ -62,5 +63,5 @@ ipcRenderer.on('git:log', (event, logEntry) => {
 
 // Clear logs UI (only visually)
 document.getElementById('clear-btn').addEventListener('click', () => {
-    logContainer.innerHTML = '<div style="color: #888; text-align: center; margin-top: 2rem;">Logs cleared.</div>';
+    logContainer.innerHTML = '<div id="empty-logs-msg" style="color: #888; text-align: center; margin-top: 2rem;">Logs cleared.</div>';
 });

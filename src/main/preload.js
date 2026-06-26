@@ -16,5 +16,10 @@ contextBridge.exposeInMainWorld('api', {
   unstageFiles: (repoPath, files) => ipcRenderer.invoke('git:unstageFiles', repoPath, files),
   commitChanges: (repoPath, message) => ipcRenderer.invoke('git:commitChanges', repoPath, message),
   getLiveDiff: (repoPath, file, isStaged) => ipcRenderer.invoke('git:getLiveDiff', repoPath, file, isStaged),
+  fetchRepository: (repoPath) => ipcRenderer.invoke('git:fetch', repoPath),
+  pullRepository: (repoPath) => ipcRenderer.invoke('git:pull', repoPath),
+  pushRepository: (repoPath) => ipcRenderer.invoke('git:push', repoPath),
+  getRemoteUrl: (repoPath) => ipcRenderer.invoke('git:getRemoteUrl', repoPath),
+  openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
   onOpenRepo: (callback) => ipcRenderer.on('app:openRepo', (_event, value) => callback(value))
 });

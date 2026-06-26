@@ -14,6 +14,28 @@ let tabState = {
 };
 let activeRepoPath = null;
 
+// Toast Function
+function showToast(message, type = 'info') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message.trim();
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     const openRepoBtn = document.getElementById('open-repo-btn');
@@ -39,6 +61,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.api && window.api.onOpenRepo) {
         window.api.onOpenRepo((repoPath) => {
             openRepository(repoPath);
+        });
+    }
+
+    // Remote URL Link click
+    const remoteLink = document.getElementById('remote-url-display');
+    if (remoteLink) {
+        remoteLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const url = e.target.dataset.webUrl;
+            if (url && window.api && window.api.openExternal) {
+                await window.api.openExternal(url);
+            }
         });
     }
 
@@ -75,6 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const commits = await window.api.getCommits(repoPath);
             renderCommits(commits, commitsListEl, repoPath);
+
+            // Load remote URL
+            const remoteUrl = await window.api.getRemoteUrl(repoPath);
+            const remoteDisplay = document.getElementById('remote-url-display');
+            if (remoteDisplay) {
+                remoteDisplay.textContent = remoteUrl || 'No remote configured';
+            }
         } catch (error) {
             console.error('Error loading repo data:', error);
             alert('Failed to load repository data.');
@@ -157,6 +198,50 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Network Controls
+    document.getElementById('fetch-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        try {
+            document.getElementById('fetch-btn').style.opacity = '0.5';
+            const output = await window.api.fetchRepository(activeRepoPath);
+            showToast(output, 'success');
+            await loadRepoData(activeRepoPath);
+        } catch (error) {
+            showToast('Error fetching:\n' + error.message, 'error');
+        } finally {
+            document.getElementById('fetch-btn').style.opacity = '1';
+        }
+    });
+
+    document.getElementById('pull-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        try {
+            document.getElementById('pull-btn').style.opacity = '0.5';
+            const output = await window.api.pullRepository(activeRepoPath);
+            showToast(output, 'success');
+            await loadRepoData(activeRepoPath);
+            loadStagingData(activeRepoPath);
+        } catch (error) {
+            showToast('Error pulling:\n' + error.message, 'error');
+        } finally {
+            document.getElementById('pull-btn').style.opacity = '1';
+        }
+    });
+
+    document.getElementById('push-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        try {
+            document.getElementById('push-btn').style.opacity = '0.5';
+            const output = await window.api.pushRepository(activeRepoPath);
+            showToast(output, 'success');
+            await loadRepoData(activeRepoPath);
+        } catch (error) {
+            showToast('Error pushing:\n' + error.message, 'error');
+        } finally {
+            document.getElementById('push-btn').style.opacity = '1';
+        }
+    });
 
     // Branch & Stash Controls
     document.getElementById('branch-selector').addEventListener('change', async (e) => {
@@ -343,6 +428,7 @@ function switchTab(id) {
     landingView.classList.add('hidden');
     tabsBar.classList.remove('hidden');
     commitsView.classList.remove('hidden');
+    document.getElementById('status-bar').classList.remove('hidden');
     
     // Clear diff pane on tab switch
     document.getElementById('details-placeholder').classList.remove('hidden');
@@ -376,6 +462,29 @@ async function loadHistoryData(repoPath) {
 
         const commits = await window.api.getCommits(repoPath);
         renderCommits(commits, commitsListEl, repoPath);
+
+        // Load remote URL
+        const remoteUrl = await window.api.getRemoteUrl(repoPath);
+        const remoteDisplay = document.getElementById('remote-url-display');
+        if (remoteDisplay) {
+            if (remoteUrl) {
+                remoteDisplay.textContent = remoteUrl;
+                remoteDisplay.classList.remove('disabled');
+                
+                // Format to web URL
+                let webUrl = remoteUrl;
+                if (webUrl.startsWith('git@')) {
+                    webUrl = 'https://' + webUrl.substring(4).replace(':', '/').replace(/\.git$/, '');
+                } else if (webUrl.startsWith('http')) {
+                    webUrl = webUrl.replace(/\.git$/, '');
+                }
+                remoteDisplay.dataset.webUrl = webUrl;
+            } else {
+                remoteDisplay.textContent = 'No remote configured';
+                remoteDisplay.classList.add('disabled');
+                remoteDisplay.dataset.webUrl = '';
+            }
+        }
 
         const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
         if (tab && tab.activeCommitHash && tab.activeFile && tab.activeCommitHash !== 'STAGED' && tab.activeCommitHash !== 'UNSTAGED') {
@@ -581,6 +690,7 @@ function closeTab(id) {
         tabsBar.classList.add('hidden');
         commitsView.classList.add('hidden');
         landingView.classList.remove('hidden');
+        document.getElementById('status-bar').classList.add('hidden');
     } else if (tabState.activeTabId === id) {
         const nextIndex = Math.max(0, index - 1);
         switchTab(tabState.tabs[nextIndex].id);
