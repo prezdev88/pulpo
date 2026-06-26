@@ -348,27 +348,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     restoreTabsState();
 
-    // Zoom on diff-viewer with Ctrl + MouseWheel
+    // Custom fast zoom and persistence for Monaco Editor
     const diffViewerEl = document.getElementById('diff-viewer');
     if (diffViewerEl) {
-        let currentZoom = parseFloat(localStorage.getItem('pulpo-diff-zoom')) || 0.85;
-        diffViewerEl.style.fontSize = `${currentZoom}rem`;
-
         diffViewerEl.addEventListener('wheel', (e) => {
             if (e.ctrlKey) {
                 e.preventDefault();
-                // Zoom in (scroll up) or Zoom out (scroll down)
+                e.stopPropagation();
+                let currentFontSize = parseInt(localStorage.getItem('pulpo-monaco-fontsize')) || 14;
                 if (e.deltaY < 0) {
-                    currentZoom += 0.05;
+                    currentFontSize += 2; // Zoom in fast
                 } else {
-                    currentZoom -= 0.05;
+                    currentFontSize -= 2; // Zoom out fast
                 }
-                // Cap zoom levels
-                currentZoom = Math.max(0.4, Math.min(currentZoom, 3.0));
-                diffViewerEl.style.fontSize = `${currentZoom}rem`;
-                localStorage.setItem('pulpo-diff-zoom', currentZoom.toString());
+                currentFontSize = Math.max(8, Math.min(currentFontSize, 40));
+                localStorage.setItem('pulpo-monaco-fontsize', currentFontSize.toString());
+                
+                if (monacoEditorInstance) {
+                    monacoEditorInstance.updateOptions({ fontSize: currentFontSize });
+                }
             }
-        });
+        }, { capture: true, passive: false });
     }
 });
 
@@ -990,13 +990,17 @@ function renderMonacoDiff(diffData) {
     const originalModel = window.monaco.editor.createModel(diffData.original || '', language);
     const modifiedModel = window.monaco.editor.createModel(diffData.modified || '', language);
 
+    // Retrieve stored font size or default to 14
+    const storedFontSize = parseInt(localStorage.getItem('pulpo-monaco-fontsize')) || 14;
+
     monacoEditorInstance = window.monaco.editor.createDiffEditor(container, {
         theme: 'vs-dark',
         automaticLayout: true,
         readOnly: true,
         minimap: { enabled: true },
         scrollBeyondLastLine: false,
-        renderSideBySide: true // Standard VS Code side-by-side diff
+        renderSideBySide: true, // Standard VS Code side-by-side diff
+        fontSize: storedFontSize
     });
 
     monacoEditorInstance.setModel({
