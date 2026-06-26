@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (action === 'push') {
             try {
                 showToast('Pushing to remote...', 'info');
-                await window.api.push(activeRepoPath);
+                await window.api.pushRepository(activeRepoPath);
                 showToast('Push successful!', 'success');
             } catch(e) {
                 alert(e.message);
