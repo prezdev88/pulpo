@@ -1,8 +1,9 @@
 const { exec } = require('./gitExec');
 
-function createBranch(repoPath, branchName) {
+function createBranch(repoPath, branchName, commitHash) {
     return new Promise((resolve, reject) => {
-        exec(`git checkout -b ${branchName}`, { cwd: repoPath }, (error, stdout, stderr) => {
+        const target = commitHash ? ` ${commitHash}` : '';
+        exec(`git checkout -b ${branchName}${target}`, { cwd: repoPath }, (error, stdout, stderr) => {
             if (error) {
                 return reject(error);
             }

@@ -5,6 +5,7 @@ const { getCommits } = require('../core/getCommitsUseCase');
 const getBranches = require('../core/getBranchesUseCase');
 const checkoutBranch = require('../core/checkoutBranchUseCase');
 const createBranch = require('../core/createBranchUseCase');
+const deleteBranch = require('../core/deleteBranchUseCase');
 const stashChanges = require('../core/stashChangesUseCase');
 const popStash = require('../core/popStashUseCase');
 const getCommitFiles = require('../core/getCommitFilesUseCase');
@@ -119,8 +120,12 @@ app.whenReady().then(() => {
     return await checkoutBranch(repoPath, branchName);
   });
 
-  ipcMain.handle('git:createBranch', async (event, repoPath, branchName) => {
-    return await createBranch(repoPath, branchName);
+  ipcMain.handle('git:createBranch', async (event, repoPath, branchName, commitHash) => {
+    return await createBranch(repoPath, branchName, commitHash);
+  });
+
+  ipcMain.handle('git:deleteBranch', async (event, repoPath, branchName) => {
+    return await deleteBranch(repoPath, branchName);
   });
 
   ipcMain.handle('git:stash', async (event, repoPath) => {

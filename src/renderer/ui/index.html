@@ -44,6 +44,7 @@
                         <vscode-button appearance="icon" id="pull-btn" class="activity-action" title="Pull"><i class="fa-solid fa-arrow-down"></i></vscode-button>
                         <vscode-button appearance="icon" id="push-btn" class="activity-action" title="Push"><i class="fa-solid fa-arrow-up"></i></vscode-button>
                         <vscode-button appearance="icon" id="new-branch-btn" class="activity-action" title="Create New Branch"><i class="fa-solid fa-code-branch"></i></vscode-button>
+                        <vscode-button appearance="icon" id="delete-branch-btn" class="activity-action" title="Delete Current Branch"><i class="fa-solid fa-trash"></i></vscode-button>
                     </div>
                 </nav>
                 <aside class="commits-sidebar" id="commits-sidebar">
@@ -180,6 +181,25 @@
                 <vscode-button id="cancel-branch-btn" appearance="secondary" class="glass-btn" style="margin-right: 0.5rem;">Cancel</vscode-button>
                 <vscode-button id="confirm-branch-btn" class="primary-btn">Create</vscode-button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal for Delete Branch -->
+    <div id="delete-branch-modal" class="modal hidden">
+        <div class="modal-content" style="width: 400px;">
+            <h3>Delete Branch</h3>
+            <p id="delete-branch-text" style="margin-bottom: 1rem;"></p>
+            <div style="text-align: right;">
+                <vscode-button id="cancel-delete-branch-btn" appearance="secondary" class="glass-btn" style="margin-right: 0.5rem;">Cancel</vscode-button>
+                <vscode-button id="confirm-delete-branch-btn" style="background: #f87171; color: white;">Delete</vscode-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu for Commits -->
+    <div id="commit-context-menu" class="context-menu hidden">
+        <div class="context-menu-item" id="ctx-create-branch">
+            <i class="fa-solid fa-code-branch"></i> Create Branch from Here...
         </div>
     </div>
 

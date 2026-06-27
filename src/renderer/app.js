@@ -14,6 +14,7 @@ let tabState = {
 };
 let activeRepoPath = null;
 let monacoEditorInstance = null;
+let currentBranchTargetCommit = null;
 // Toast Function
 function showToast(message, type = 'info') {
     let container = document.getElementById('toast-container');
@@ -47,6 +48,22 @@ document.addEventListener('DOMContentLoaded', () => {
             openRepository(repoPath);
         }
     });
+
+    document.addEventListener('click', () => {
+        const ctxMenu = document.getElementById('commit-context-menu');
+        if (ctxMenu) ctxMenu.classList.add('hidden');
+    });
+
+    const ctxCreateBranch = document.getElementById('ctx-create-branch');
+    if (ctxCreateBranch) {
+        ctxCreateBranch.addEventListener('click', () => {
+            const modal = document.getElementById('branch-modal');
+            const input = document.getElementById('branch-name-input');
+            input.value = '';
+            modal.classList.remove('hidden');
+            input.focus();
+        });
+    }
 
     if (openRepoBtn) {
         openRepoBtn.addEventListener('click', async () => {
@@ -259,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('new-branch-btn').addEventListener('click', () => {
         if (!activeRepoPath) return;
+        currentBranchTargetCommit = null;
         const modal = document.getElementById('branch-modal');
         const input = document.getElementById('branch-name-input');
         input.value = '';
@@ -275,12 +293,58 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('branch-name-input').value.trim();
         if (name) {
             try {
-                await window.api.createBranch(activeRepoPath, name);
+                await window.api.createBranch(activeRepoPath, name, currentBranchTargetCommit);
                 document.getElementById('branch-modal').classList.add('hidden');
                 await loadRepoData(activeRepoPath);
             } catch (error) {
                 alert('Error creating branch:\n' + error.message);
             }
+        }
+    });
+
+    document.getElementById('delete-branch-btn').addEventListener('click', () => {
+        if (!activeRepoPath) return;
+        const branchSelector = document.getElementById('branch-selector');
+        const currentBranch = branchSelector.value;
+        if (!currentBranch) return;
+        
+        const modal = document.getElementById('delete-branch-modal');
+        document.getElementById('delete-branch-text').textContent = `Are you sure you want to delete the branch '${currentBranch}'?`;
+        modal.classList.remove('hidden');
+    });
+
+    document.getElementById('cancel-delete-branch-btn').addEventListener('click', () => {
+        document.getElementById('delete-branch-modal').classList.add('hidden');
+    });
+
+    document.getElementById('confirm-delete-branch-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        const branchSelector = document.getElementById('branch-selector');
+        const branchToDelete = branchSelector.value;
+        if (!branchToDelete) return;
+
+        try {
+            // Determine principal branch
+            const branchData = await window.api.getBranches(activeRepoPath);
+            let principalBranch = branchData.branches.includes('main') ? 'main' : (branchData.branches.includes('master') ? 'master' : null);
+            
+            // If main/master doesn't exist, pick the first available branch that isn't the one we are deleting
+            if (!principalBranch) {
+                principalBranch = branchData.branches.find(b => b !== branchToDelete);
+            }
+
+            // Checkout to principal branch first (unless we are trying to delete the only branch)
+            if (principalBranch && principalBranch !== branchToDelete) {
+                await window.api.checkoutBranch(activeRepoPath, principalBranch);
+            }
+
+            await window.api.deleteBranch(activeRepoPath, branchToDelete);
+            document.getElementById('delete-branch-modal').classList.add('hidden');
+            showToast(`Branch '${branchToDelete}' deleted successfully. Switched to '${principalBranch}'.`, 'success');
+            await loadRepoData(activeRepoPath);
+        } catch (error) {
+            document.getElementById('delete-branch-modal').classList.add('hidden');
+            alert('Error deleting branch:\n' + error.message);
         }
     });
 
@@ -779,6 +843,17 @@ function renderCommits(commits, container, repoPath) {
         clone.querySelector('[data-field="message"]').textContent = commit.message;
         clone.querySelector('[data-field="author"]').textContent = commit.author;
         
+        li.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const ctxMenu = document.getElementById('commit-context-menu');
+            if (ctxMenu) {
+                currentBranchTargetCommit = commit.hash;
+                ctxMenu.style.top = `${e.clientY}px`;
+                ctxMenu.style.left = `${e.clientX}px`;
+                ctxMenu.classList.remove('hidden');
+            }
+        });
+
         li.addEventListener('click', async () => {
             const isExpanded = li.classList.contains('expanded');
             
