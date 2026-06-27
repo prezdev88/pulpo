@@ -2,8 +2,7 @@ const { exec } = require('./gitExec');
 
 function getCommits(repoPath) {
     return new Promise((resolve, reject) => {
-        // git log format: %h||%p||%s||%an <%ae>||%ad
-        const command = `git log --pretty=format:"%h||%p||%s||%an <%ae>||%ad" --date=format:"%Y-%m-%d %H:%M"`;
+        const command = `git log --pretty=format:"%h||%p||%s||%an <%ae>||%ad" --date=format:"%d-%b-%Y %H:%M"`;
         
         exec(command, { cwd: repoPath }, (error, stdout, stderr) => {
             if (error) {
