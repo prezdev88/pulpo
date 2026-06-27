@@ -13,6 +13,7 @@ const getFileDiff = require('../core/getFileDiffUseCase');
 const { getStatus } = require('../core/getStatusUseCase');
 const { stageFiles } = require('../core/stageFilesUseCase');
 const { unstageFiles } = require('../core/unstageFilesUseCase');
+const { discardChanges } = require('../core/discardChangesUseCase');
 const { commitChanges } = require('../core/commitChangesUseCase');
 const { getLiveDiff } = require('../core/getLiveDiffUseCase');
 const { fetchUseCase } = require('../core/fetchUseCase');
@@ -154,6 +155,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('git:unstageFiles', async (event, repoPath, files) => {
     return await unstageFiles(repoPath, files);
+  });
+
+  ipcMain.handle('git:discardChanges', async (event, repoPath, files) => {
+    return await discardChanges(repoPath, files);
   });
 
   ipcMain.handle('git:commitChanges', async (event, repoPath, message) => {

@@ -68,6 +68,7 @@
                                 <div class="accordion-right">
                                     <span class="count-badge" id="changes-count">0</span>
                                     <span class="accordion-actions">
+                                        <vscode-button appearance="icon" id="discard-all-btn" class="icon-btn" title="Discard All Changes"><i class="fa-solid fa-rotate-left"></i></vscode-button>
                                         <vscode-button appearance="icon" id="stage-all-btn" class="icon-btn" title="Stage All"><i class="fa-solid fa-plus"></i></vscode-button>
                                     </span>
                                 </div>
@@ -83,6 +84,7 @@
                                 <div class="accordion-right">
                                     <span class="count-badge" id="staged-count">0</span>
                                     <span class="accordion-actions">
+                                        <vscode-button appearance="icon" id="discard-all-staged-btn" class="icon-btn" title="Discard All Staged Changes"><i class="fa-solid fa-rotate-left"></i></vscode-button>
                                         <vscode-button appearance="icon" id="unstage-all-btn" class="icon-btn" title="Unstage All"><i class="fa-solid fa-minus"></i></vscode-button>
                                     </span>
                                 </div>
@@ -166,6 +168,7 @@
                 <span class="file-directory" style="color: #666; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
             </div>
             <div class="file-actions">
+                <vscode-button appearance="icon" class="discard-file-btn icon-btn" title="Discard Changes" style="display: none;"><i class="fa-solid fa-rotate-left"></i></vscode-button>
                 <vscode-button appearance="icon" class="stage-toggle-btn icon-btn"></vscode-button>
             </div>
             <span class="file-status" style="margin-left: 8px; font-weight: 600; font-size: 0.8rem;"></span>

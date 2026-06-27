@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
   getStatus: (repoPath) => ipcRenderer.invoke('git:getStatus', repoPath),
   stageFiles: (repoPath, files) => ipcRenderer.invoke('git:stageFiles', repoPath, files),
   unstageFiles: (repoPath, files) => ipcRenderer.invoke('git:unstageFiles', repoPath, files),
+  discardChanges: (repoPath, files) => ipcRenderer.invoke('git:discardChanges', repoPath, files),
   commitChanges: (repoPath, message) => ipcRenderer.invoke('git:commitChanges', repoPath, message),
   getLiveDiff: (repoPath, file, isStaged) => ipcRenderer.invoke('git:getLiveDiff', repoPath, file, isStaged),
   fetchRepository: (repoPath) => ipcRenderer.invoke('git:fetch', repoPath),

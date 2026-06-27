@@ -373,12 +373,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Staging / Commit Controls
 
+    document.getElementById('discard-all-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        if (!confirm('Are you sure you want to discard ALL unstaged changes? This cannot be undone.')) return;
+        try {
+            await window.api.discardChanges(activeRepoPath, ['.']);
+            loadStagingData(activeRepoPath);
+        } catch(e) { alert('Error discarding changes: ' + e.message); }
+    });
+
     document.getElementById('stage-all-btn').addEventListener('click', async () => {
         if (!activeRepoPath) return;
         try {
             await window.api.stageFiles(activeRepoPath, ['.']);
             loadStagingData(activeRepoPath);
         } catch(e) { alert(e.message); }
+    });
+
+    document.getElementById('discard-all-staged-btn').addEventListener('click', async () => {
+        if (!activeRepoPath) return;
+        if (!confirm('Are you sure you want to discard ALL staged changes? This cannot be undone.')) return;
+        try {
+            // Get all staged files from the UI list
+            const stagedList = document.getElementById('staged-files-list');
+            const fileRows = Array.from(stagedList.querySelectorAll('li'));
+            const filesToDiscard = fileRows.map(li => {
+                const basename = li.querySelector('.file-name').textContent;
+                const dir = li.querySelector('.file-directory').textContent;
+                return dir ? `${dir}/${basename}` : basename;
+            });
+            if (filesToDiscard.length === 0) return;
+
+            await window.api.discardChanges(activeRepoPath, filesToDiscard);
+            loadStagingData(activeRepoPath);
+        } catch(e) { alert('Error discarding staged changes: ' + e.message); }
     });
 
     document.getElementById('unstage-all-btn').addEventListener('click', async () => {
@@ -466,11 +494,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (window.api && window.api.onRepoChanged) {
+        let repoUpdateTimeout;
         window.api.onRepoChanged((repoPath) => {
             if (activeRepoPath === repoPath) {
-                console.log('Real-time file change detected in', repoPath);
-                loadStagingData(repoPath);
-                loadHistoryData(repoPath); 
+                clearTimeout(repoUpdateTimeout);
+                repoUpdateTimeout = setTimeout(() => {
+                    console.log('Real-time file change detected in', repoPath);
+                    loadStagingData(repoPath);
+                    loadHistoryData(repoPath); 
+                }, 1500);
             }
         });
     }
@@ -728,6 +760,19 @@ function renderStagingFiles(files, containerId, isStaged, repoPath) {
         btn.innerHTML = isStaged ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-plus"></i>';
         btn.title = isStaged ? 'Unstage' : 'Stage';
         
+        const discardBtn = clone.querySelector('.discard-file-btn');
+        discardBtn.style.display = 'inline-flex';
+        discardBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm(`Are you sure you want to discard changes in ${f.file}?`)) return;
+            try {
+                await window.api.discardChanges(repoPath, [f.file]);
+                loadStagingData(repoPath);
+            } catch (err) {
+                alert('Error discarding changes: ' + err.message);
+            }
+        });
+
         btn.addEventListener('click', async (e) => {
             e.stopPropagation(); // Prevent opening diff
             try {
