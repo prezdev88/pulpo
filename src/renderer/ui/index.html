@@ -45,6 +45,7 @@
                         <vscode-button appearance="icon" id="push-btn" class="activity-action" title="Push"><i class="fa-solid fa-arrow-up"></i></vscode-button>
                         <vscode-button appearance="icon" id="new-branch-btn" class="activity-action" title="Create New Branch"><i class="fa-solid fa-code-branch"></i></vscode-button>
                         <vscode-button appearance="icon" id="delete-branch-btn" class="activity-action" title="Delete Current Branch"><i class="fa-solid fa-trash"></i></vscode-button>
+                        <vscode-button appearance="icon" id="stash-changes-btn" class="activity-action" title="Stash Changes" disabled><i class="fa-solid fa-box-archive"></i></vscode-button>
                     </div>
                 </nav>
                 <aside class="commits-sidebar" id="commits-sidebar">
@@ -91,6 +92,18 @@
                             </h4>
                             <div class="accordion-content">
                                 <ul id="staged-files-list" class="file-list"></ul>
+                            </div>
+                        </div>
+
+                        <div class="staging-accordion" id="stashes-accordion">
+                            <h4 class="accordion-header">
+                                <span class="accordion-title"><i class="fa-solid fa-chevron-right accordion-icon"></i> Stashes</span>
+                                <div class="accordion-right">
+                                    <span class="count-badge" id="stashes-count">0</span>
+                                </div>
+                            </h4>
+                            <div class="accordion-content">
+                                <ul id="stashes-list" class="file-list"></ul>
                             </div>
                         </div>
                     </div>
@@ -175,6 +188,22 @@
         </li>
     </template>
 
+    <!-- Template for Stash Item -->
+    <template id="stash-row-template">
+        <li class="staging-file-row stash-row">
+            <span class="file-icon" style="margin-right: 8px; width: 16px; text-align: center;"><i class="fa-solid fa-box-archive" style="color: #666;"></i></span>
+            <div class="file-info" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; gap: 2px;">
+                <span class="stash-message" style="color: #e8e8e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem;"></span>
+                <span class="stash-meta" style="color: #666; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+            </div>
+            <div class="file-actions stash-actions" style="display: none;">
+                <vscode-button appearance="icon" class="stash-apply-btn icon-btn" title="Apply Stash"><i class="fa-solid fa-plus"></i></vscode-button>
+                <vscode-button appearance="icon" class="stash-pop-btn icon-btn" title="Pop Stash"><i class="fa-solid fa-arrow-up-from-bracket"></i></vscode-button>
+                <vscode-button appearance="icon" class="stash-drop-btn icon-btn" title="Drop Stash"><i class="fa-solid fa-trash"></i></vscode-button>
+            </div>
+        </li>
+    </template>
+
     <!-- Modal for New Branch -->
     <div id="branch-modal" class="modal hidden">
         <div class="modal-content" style="width: 400px;">
@@ -183,6 +212,19 @@
             <div style="text-align: right;">
                 <vscode-button id="cancel-branch-btn" appearance="secondary" class="glass-btn" style="margin-right: 0.5rem;">Cancel</vscode-button>
                 <vscode-button id="confirm-branch-btn" class="primary-btn">Create</vscode-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Stash Message -->
+    <div id="stash-modal" class="modal hidden">
+        <div class="modal-content" style="width: 400px;">
+            <h3>Stash Changes</h3>
+            <p style="margin-bottom: 1rem; color: #a3a3a3; font-size: 0.85rem;">Enter an optional message for this stash.</p>
+            <vscode-text-field id="stash-message-input" class="glass-select" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem;" placeholder="Stash message (optional)..."></vscode-text-field>
+            <div style="text-align: right;">
+                <vscode-button id="cancel-stash-btn" appearance="secondary" class="glass-btn" style="margin-right: 0.5rem;">Cancel</vscode-button>
+                <vscode-button id="confirm-stash-btn" class="primary-btn">Stash</vscode-button>
             </div>
         </div>
     </div>

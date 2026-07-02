@@ -417,6 +417,45 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) { alert(e.message); }
     });
 
+    // Stash Buttons
+    const stashChangesBtn = document.getElementById('stash-changes-btn');
+    if (stashChangesBtn) {
+        stashChangesBtn.addEventListener('click', () => {
+            if (!activeRepoPath) return;
+            const modal = document.getElementById('stash-modal');
+            const input = document.getElementById('stash-message-input');
+            input.value = '';
+            modal.classList.remove('hidden');
+            input.focus();
+        });
+    }
+
+    const cancelStashBtn = document.getElementById('cancel-stash-btn');
+    if (cancelStashBtn) {
+        cancelStashBtn.addEventListener('click', () => {
+            document.getElementById('stash-modal').classList.add('hidden');
+        });
+    }
+
+    const confirmStashBtn = document.getElementById('confirm-stash-btn');
+    if (confirmStashBtn) {
+        confirmStashBtn.addEventListener('click', async () => {
+            if (!activeRepoPath) return;
+            const msg = document.getElementById('stash-message-input').value.trim();
+            try {
+                confirmStashBtn.disabled = true;
+                await window.api.stashChanges(activeRepoPath, msg);
+                document.getElementById('stash-modal').classList.add('hidden');
+                showToast('Changes stashed successfully.', 'success');
+                loadStagingData(activeRepoPath);
+            } catch (error) {
+                alert('Error stashing changes:\n' + error.message);
+            } finally {
+                confirmStashBtn.disabled = false;
+            }
+        });
+    }
+
     document.getElementById('commit-message-input').addEventListener('input', (e) => {
         const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
         if (tab) {
@@ -670,6 +709,17 @@ async function loadStagingData(repoPath) {
 
         renderStagingFiles(status.staged, 'staged-files-list', true, repoPath);
         renderStagingFiles(status.unstaged, 'unstaged-files-list', false, repoPath);
+        
+        // Handle Stash Button State
+        const stashBtn = document.getElementById('stash-changes-btn');
+        if (stashBtn) {
+            const hasChanges = status.unstaged.length > 0 || status.staged.length > 0;
+            stashBtn.disabled = !hasChanges;
+            stashBtn.style.opacity = hasChanges ? '1' : '0.3';
+            stashBtn.style.cursor = hasChanges ? 'pointer' : 'not-allowed';
+        }
+        
+        if(typeof loadStashesData === 'function') loadStashesData(repoPath);
 
         const tab = tabState.tabs.find(t => t.id === tabState.activeTabId);
         
@@ -796,6 +846,74 @@ function renderStagingFiles(files, containerId, isStaged, repoPath) {
 
         container.appendChild(clone);
     });
+}
+
+async function loadStashesData(repoPath) {
+    try {
+        const stashes = await window.api.listStashes(repoPath);
+        const countBadge = document.getElementById('stashes-count');
+        if (countBadge) countBadge.textContent = stashes.length;
+        
+        const container = document.getElementById('stashes-list');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const stashesAcc = document.getElementById('stashes-accordion');
+        if (stashes.length === 0) {
+            if (stashesAcc) stashesAcc.classList.add('hidden');
+            return;
+        } else {
+            if (stashesAcc) stashesAcc.classList.remove('hidden');
+        }
+
+        const template = document.getElementById('stash-row-template');
+        if (!template) return;
+        
+        stashes.forEach(stash => {
+            const clone = template.content.cloneNode(true);
+            const li = clone.querySelector('li');
+            
+            clone.querySelector('.stash-message').textContent = stash.message;
+            clone.querySelector('.stash-meta').textContent = `${stash.id} • ${stash.date}`;
+            
+            const actions = clone.querySelector('.stash-actions');
+            
+            li.addEventListener('mouseenter', () => actions.style.display = 'flex');
+            li.addEventListener('mouseleave', () => actions.style.display = 'none');
+            
+            clone.querySelector('.stash-apply-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                try {
+                    await window.api.applyStash(repoPath, stash.id);
+                    showToast(`Applied ${stash.id}`, 'success');
+                    loadStagingData(repoPath);
+                } catch(err) { alert('Error applying stash: ' + err.message); }
+            });
+            
+            clone.querySelector('.stash-pop-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                try {
+                    await window.api.popStash(repoPath, stash.id);
+                    showToast(`Popped ${stash.id}`, 'success');
+                    loadStagingData(repoPath);
+                } catch(err) { alert('Error popping stash: ' + err.message); }
+            });
+            
+            clone.querySelector('.stash-drop-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!confirm(`Are you sure you want to drop ${stash.id}?`)) return;
+                try {
+                    await window.api.dropStash(repoPath, stash.id);
+                    showToast(`Dropped ${stash.id}`, 'success');
+                    loadStagingData(repoPath);
+                } catch(err) { alert('Error dropping stash: ' + err.message); }
+            });
+
+            container.appendChild(clone);
+        });
+    } catch (err) {
+        console.error('Error loading stashes:', err);
+    }
 }
 
 async function renderLiveDiff(repoPath, file, isStaged) {

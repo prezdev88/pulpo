@@ -8,6 +8,9 @@ const createBranch = require('../core/createBranchUseCase');
 const deleteBranch = require('../core/deleteBranchUseCase');
 const stashChanges = require('../core/stashChangesUseCase');
 const popStash = require('../core/popStashUseCase');
+const listStashes = require('../core/listStashesUseCase');
+const applyStash = require('../core/applyStashUseCase');
+const dropStash = require('../core/dropStashUseCase');
 const getCommitFiles = require('../core/getCommitFilesUseCase');
 const getFileDiff = require('../core/getFileDiffUseCase');
 const { getStatus } = require('../core/getStatusUseCase');
@@ -155,6 +158,26 @@ app.whenReady().then(() => {
 
   ipcMain.handle('git:unstageFiles', async (event, repoPath, files) => {
     return await unstageFiles(repoPath, files);
+  });
+
+  ipcMain.handle('git:stashChanges', async (event, repoPath, message) => {
+    return await stashChanges(repoPath, message);
+  });
+
+  ipcMain.handle('git:listStashes', async (event, repoPath) => {
+    return await listStashes(repoPath);
+  });
+
+  ipcMain.handle('git:popStash', async (event, repoPath, stashId) => {
+    return await popStash(repoPath, stashId);
+  });
+
+  ipcMain.handle('git:applyStash', async (event, repoPath, stashId) => {
+    return await applyStash(repoPath, stashId);
+  });
+
+  ipcMain.handle('git:dropStash', async (event, repoPath, stashId) => {
+    return await dropStash(repoPath, stashId);
   });
 
   ipcMain.handle('git:discardChanges', async (event, repoPath, files) => {

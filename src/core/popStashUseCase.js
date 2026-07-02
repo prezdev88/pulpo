@@ -1,8 +1,9 @@
 const { exec } = require('./gitExec');
 
-function popStash(repoPath) {
+function popStash(repoPath, stashId) {
     return new Promise((resolve, reject) => {
-        exec('git stash pop', { cwd: repoPath }, (error, stdout, stderr) => {
+        const cmd = stashId ? `git stash pop "${stashId}"` : 'git stash pop';
+        exec(cmd, { cwd: repoPath }, (error, stdout, stderr) => {
             if (error) {
                 return reject(error);
             }
